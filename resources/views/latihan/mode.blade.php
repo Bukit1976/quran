@@ -1,21 +1,25 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100 sm:text-2xl">
-                    Mode {{ $mode }} - Latihan Hafalan
-                </h2>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ $ayat->surah->nama }} - Ayat {{ $ayat->nomor_ayat }}
-                </p>
-            </div>
-            <a href="{{ route('latihan.index', $ayat->id) }}"
-                class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
-                ← Kembali
-            </a>
-        </div>
-    </x-slot>
+@extends('layouts.app')
 
+@section('title', "Mode {$mode} - Latihan Hafalan")
+
+@section('header')
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100 sm:text-2xl">
+                Mode {{ $mode }} - Latihan Hafalan
+            </h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ $ayat->surah->nama }} - Ayat {{ $ayat->nomor_ayat }}
+            </p>
+        </div>
+        <a href="{{ route('latihan.index', $ayat->id) }}"
+            class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+            ← Kembali
+        </a>
+    </div>
+@endsection
+
+@section('content')
     <div class="mx-auto max-w-4xl space-y-6">
         <!-- Info Mode -->
         <div class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white shadow-lg">
@@ -44,8 +48,7 @@
         </div>
 
         <!-- Ayat dengan Kata Tersembunyi -->
-        <div
-            class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800 sm:p-8">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800 sm:p-8">
             <div
                 class="font-arabic text-right text-2xl leading-loose text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
                 @foreach ($kataKata as $index => $kata)
@@ -80,10 +83,11 @@
             <p class="text-gray-700 dark:text-gray-300">{{ $ayat->terjemahan }}</p>
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         function tampilkanSemua() {
-            // Tampilkan semua kata yang tersembunyi
             const spans = document.querySelectorAll('.font-arabic span');
             spans.forEach(span => {
                 if (span.textContent.trim() === '______') {
@@ -91,9 +95,7 @@
                     span.classList.add('text-emerald-600', 'dark:text-emerald-400');
                 }
             });
-
-            // Tampilkan terjemahan
             document.getElementById('terjemahanBox').classList.remove('hidden');
         }
     </script>
-</x-app-layout>
+@endpush

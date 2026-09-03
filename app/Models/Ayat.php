@@ -13,7 +13,7 @@ class Ayat extends Model
 
     protected $fillable = [
         'surah_id',
-        'juz', // TAMBAHKAN INI
+        'juz',
         'nomor_ayat',
         'teks_arab',
         'transliterasi',
@@ -23,7 +23,7 @@ class Ayat extends Model
 
     public function surah()
     {
-        return $this->belongsTo(Surah::class);
+        return $this->belongsTo(Surah::class, 'surah_id', 'id');
     }
 
     public function hafalans()

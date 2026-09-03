@@ -1,8 +1,12 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Sedang Mengerjakan Tes</h2>
-    </x-slot>
+@extends('layouts.app')
 
+@section('title', 'Sedang Mengerjakan Tes')
+
+@section('header')
+    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Sedang Mengerjakan Tes</h2>
+@endsection
+
+@section('content')
     <div class="mx-auto max-w-3xl" x-data="quizApp()">
         <!-- Progress Bar -->
         <div class="mb-6">
@@ -29,10 +33,14 @@
                         <div class="space-y-3">
                             <template x-for="(pilihan, index) in soal[currentSoal].pilihan" :key="index">
                                 <button @click="jawab(pilihan)"
-                                    :class="{ 'bg-emerald-500 text-white': jawaban === pilihan &&
-                                        benar, 'bg-red-500 text-white': jawaban === pilihan && !
-                                        benar, 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600': jawaban !==
-                                            pilihan }"
+                                    :class="{
+                                        'bg-emerald-500 text-white': jawaban === pilihan &&
+                                            benar,
+                                        'bg-red-500 text-white': jawaban === pilihan && !
+                                            benar,
+                                        'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600': jawaban !==
+                                            pilihan
+                                    }"
                                     class="w-full rounded-lg p-4 text-left font-medium transition">
                                     <span x-text="pilihan"></span>
                                 </button>
@@ -98,7 +106,9 @@
             </form>
         </template>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         function quizApp() {
             return {
@@ -153,4 +163,4 @@
             }
         }
     </script>
-</x-app-layout>
+@endpush

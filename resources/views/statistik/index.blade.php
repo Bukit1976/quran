@@ -1,25 +1,27 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 sm:text-2xl">Statistik & Progres</h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <!-- Kartu Ringkasan -->
+@section('title', 'Statistik & Progres')
+
+@section('header')
+    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 sm:text-2xl">Statistik & Progres</h2>
+@endsection
+
+@section('content')
     <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         <div class="rounded-xl border-l-4 border-emerald-500 bg-white p-6 shadow-lg dark:bg-gray-800">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Ayat Dihafal</p>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalHafal }}</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalHafal ?? 0 }}</p>
         </div>
         <div class="rounded-xl border-l-4 border-amber-500 bg-white p-6 shadow-lg dark:bg-gray-800">
             <p class="text-sm text-gray-500 dark:text-gray-400">Sedang Dihafal</p>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $sedangHafal }}</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $sedangHafal ?? 0 }}</p>
         </div>
         <div class="rounded-xl border-l-4 border-blue-500 bg-white p-6 shadow-lg dark:bg-gray-800">
             <p class="text-sm text-gray-500 dark:text-gray-400">Rata-rata Nilai Tes</p>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($rataNilai, 1) }}</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($rataNilai ?? 0, 1) }}</p>
         </div>
     </div>
 
-    <!-- Grafik -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800">
             <h3 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">Ayat Dihafal (7 Hari Terakhir)</h3>
@@ -30,13 +32,14 @@
             <canvas id="chartTes"></canvas>
         </div>
     </div>
+@endsection
 
-    <!-- Chart.js CDN -->
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const labels = @json($labels);
-        const dataHafalan = @json($dataHafalan);
-        const dataTes = @json($dataTes);
+        const labels = @json($labels ?? []);
+        const dataHafalan = @json($dataHafalan ?? []);
+        const dataTes = @json($dataTes ?? []);
         const isDark = localStorage.getItem('darkMode') === 'true';
         const textColor = isDark ? '#e5e7eb' : '#374151';
 
@@ -114,4 +117,4 @@
             }
         });
     </script>
-</x-app-layout>
+@endpush

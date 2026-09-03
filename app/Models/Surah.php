@@ -9,6 +9,8 @@ class Surah extends Model
 {
     use HasFactory;
 
+    protected $table = 'surahs';
+
     protected $fillable = [
         'nomor',
         'nama',
@@ -18,6 +20,6 @@ class Surah extends Model
 
     public function ayats()
     {
-        return $this->hasMany(Ayat::class);
+        return $this->hasMany(Ayat::class, 'surah_id', 'id')->orderBy('nomor_ayat', 'asc');
     }
 }

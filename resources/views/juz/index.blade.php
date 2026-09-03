@@ -1,19 +1,23 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100 sm:text-2xl">
-            {{ __('Daftar Juz Al-Qur\'an') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
+@section('title', 'Daftar Juz Al-Qur\'an')
+
+@section('header')
+    <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100 sm:text-2xl">
+        {{ __('Daftar Juz Al-Qur\'an') }}
+    </h2>
+@endsection
+
+@section('content')
     <div class="space-y-6">
-        <!-- Info Card -->
+        {{-- Info Card --}}
         <div class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white shadow-lg">
             <h3 class="mb-2 text-xl font-bold">📖 30 Juz Al-Qur'an</h3>
             <p class="text-sm text-emerald-100">Al-Qur'an terdiri dari 30 Juz, 114 Surah, dan 6236 Ayat. Pilih Juz untuk
                 mulai membaca.</p>
         </div>
 
-        <!-- Grid Juz -->
+        {{-- Grid Juz --}}
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-5 lg:grid-cols-6">
             @foreach ($juzList as $nomor => $info)
                 <a href="{{ route('juz.show', $nomor) }}"
@@ -30,4 +34,4 @@
             @endforeach
         </div>
     </div>
-</x-app-layout>
+@endsection

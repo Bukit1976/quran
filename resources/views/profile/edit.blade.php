@@ -1,15 +1,18 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">
-            {{ __('Profil Saya') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
+@section('title', 'Profil Saya')
+
+@section('header')
+    <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">
+        {{ __('Profil Saya') }}
+    </h2>
+@endsection
+
+@section('content')
     <div class="mx-auto max-w-2xl">
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             @if (session('success'))
-                <div
-                    class="mb-6 rounded-lg bg-emerald-100 p-4 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                <div class="mb-6 rounded-lg bg-emerald-100 p-4 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
                     {{ session('success') }}
                 </div>
             @endif
@@ -49,4 +52,4 @@
             </form>
         </div>
     </div>
-</x-app-layout>
+@endsection

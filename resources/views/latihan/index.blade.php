@@ -1,21 +1,25 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100 sm:text-2xl">
-                    Mode Latihan Hafalan
-                </h2>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ $ayat->surah->nama }} - Ayat {{ $ayat->nomor_ayat }}
-                </p>
-            </div>
-            <a href="{{ route('quran.show', $ayat->surah_id) }}"
-                class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
-                ← Kembali
-            </a>
-        </div>
-    </x-slot>
+@extends('layouts.app')
 
+@section('title', 'Mode Latihan Hafalan')
+
+@section('header')
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100 sm:text-2xl">
+                Mode Latihan Hafalan
+            </h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ $ayat->surah->nama }} - Ayat {{ $ayat->nomor_ayat }}
+            </p>
+        </div>
+        <a href="{{ route('quran.show', $ayat->surah_id) }}"
+            class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+            ← Kembali
+        </a>
+    </div>
+@endsection
+
+@section('content')
     <div class="mx-auto max-w-4xl space-y-6">
         <!-- Ayat Lengkap -->
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
@@ -133,7 +137,9 @@
             @endif
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         let audioPlayer = document.getElementById('audioPlayer');
         let statusPutar = document.getElementById('statusPutar');
@@ -166,4 +172,4 @@
             }
         });
     </script>
-</x-app-layout>
+@endpush
