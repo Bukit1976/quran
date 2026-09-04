@@ -18,15 +18,6 @@
 
 @section('content')
     <div class="space-y-4 sm:space-y-6">
-        {{-- Bismillah --}}
-        @if ($surah->nomor != 9)
-            <div
-                class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <p class="font-arabic text-2xl leading-loose text-gray-900 dark:text-white sm:text-3xl">
-                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-                </p>
-            </div>
-        @endif
 
         {{-- Tombol Kontrol Audio --}}
         <div class="sticky top-20 z-40 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 p-4 shadow-lg">
@@ -60,6 +51,54 @@
             </div>
         </div>
 
+        {{-- BISMILLAH DENGAN AUDIO - DIPINDAH KE SINI (setelah audio controls) --}}
+        @if ($surah->nomor != 9 && $surah->nomor != 1)
+            <div id="ayat-container-bismillah"
+                class="ayat-container rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm transition-all duration-500 dark:border-gray-700 dark:bg-gray-800 sm:p-6">
+                {{-- Header Bismillah --}}
+                <div class="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <span
+                        class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 sm:text-sm">
+                        Basmalah
+                    </span>
+                    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                        <audio id="audio-bismillah" class="audio-player h-10 w-full rounded-lg sm:w-64"
+                            data-ayat-id="bismillah" data-index="-1" controls>
+                            <source src="https://everyayah.com/data/Alafasy_128kbps/001001.mp3" type="audio/mpeg">
+                        </audio>
+                    </div>
+                </div>
+
+                {{-- Teks Arab Bismillah --}}
+                <div class="font-arabic mb-4 text-right text-2xl leading-[2.2] text-gray-900 dark:text-white sm:text-3xl lg:text-4xl"
+                    id="ayat-text-bismillah" dir="rtl">
+                    @php
+                        $words = preg_split('/\s+/', trim('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'));
+                    @endphp
+                    @foreach ($words as $wIdx => $word)
+                        <span class="quran-word" data-word-index="{{ $wIdx }}">{{ $word }}</span>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Cek apakah ada Ayat 1 di database --}}
+        @php
+            $firstAyat = $surah->ayats->first();
+            $hasAyat1 = $firstAyat && $firstAyat->nomor_ayat == 1;
+        @endphp
+
+        {{-- Jika TIDAK ada Ayat 1 di database, tampilkan pesan --}}
+        @if (!$hasAyat1 && $surah->nomor != 1)
+            <div
+                class="rounded-xl border-2 border-yellow-400 bg-yellow-50 p-4 dark:border-yellow-600 dark:bg-yellow-900/20">
+                <p class="text-sm text-yellow-800 dark:text-yellow-300">
+                    <strong>⚠️ Catatan:</strong> Database tidak memiliki Ayat 1 untuk surah ini.
+                    Silakan lengkapi database dengan menjalankan query SQL yang sudah diberikan.
+                </p>
+            </div>
+        @endif
+
         {{-- Daftar Ayat --}}
         @foreach ($surah->ayats as $index => $ayat)
             <div id="ayat-container-{{ $ayat->id }}"
@@ -89,7 +128,6 @@
                 <div class="font-arabic mb-4 text-right text-2xl leading-[2.2] text-gray-900 dark:text-white sm:text-3xl lg:text-4xl"
                     id="ayat-text-{{ $ayat->id }}" dir="rtl">
                     @php
-                        // Pecah per kata (space), tapi JANGAN pecah per huruf
                         $words = preg_split('/\s+/', trim($ayat->teks_arab));
                     @endphp
                     @foreach ($words as $wIdx => $word)
@@ -140,7 +178,6 @@
 
 @push('styles')
     <style>
-        /* Highlight container ayat aktif */
         .ayat-container.active {
             border-color: #10b981 !important;
             box-shadow: 0 0 30px rgba(16, 185, 129, 0.5) !important;
@@ -153,7 +190,6 @@
             background: linear-gradient(135deg, #064e3b 0%, #1f2937 100%) !important;
         }
 
-        /* Setiap kata dalam ayat - TIDAK dipecah per huruf */
         .quran-word {
             display: inline-block;
             margin: 0 2px;
@@ -162,22 +198,17 @@
             padding: 0 2px;
         }
 
-        /* Kata yang sedang dibaca - WARNA EMAS dengan glow */
         .quran-word.active-word {
             color: #f59e0b !important;
-            text-shadow:
-                0 0 10px rgba(245, 158, 11, 0.6),
-                0 0 20px rgba(245, 158, 11, 0.3);
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.6), 0 0 20px rgba(245, 158, 11, 0.3);
             transform: scale(1.08);
             font-weight: 700;
         }
 
-        /* Kata yang sudah dibaca - sedikit pudar */
         .quran-word.read-word {
             opacity: 0.7;
         }
 
-        /* Warna Tajwid */
         .tajwid-ghunnah {
             color: #ef4444;
             font-weight: bold;
@@ -197,11 +228,10 @@
     <script>
         let isPlayingAll = false;
         let currentIndex = 0;
-        const totalAyats = {{ $surah->ayats->count() }};
+        const totalAyats = document.querySelectorAll('.audio-player').length;
         let wordHighlightInterval = null;
         let lastActiveWord = null;
 
-        // Highlight container ayat
         function highlightAyat(ayatId) {
             document.querySelectorAll('.ayat-container').forEach(el => el.classList.remove('active'));
             const activeContainer = document.getElementById('ayat-container-' + ayatId);
@@ -214,10 +244,8 @@
             }
         }
 
-        // Highlight per KATA dengan smooth transition
         function startWordHighlight(audio, ayatId) {
             stopWordHighlight();
-
             const textContainer = document.getElementById('ayat-text-' + ayatId);
             if (!textContainer) return;
 
@@ -225,33 +253,26 @@
             const totalWords = words.length;
             if (totalWords === 0) return;
 
-            // Reset semua kata
-            words.forEach(w => {
-                w.classList.remove('active-word', 'read-word');
-            });
+            words.forEach(w => w.classList.remove('active-word', 'read-word'));
 
             const duration = audio.duration || 10;
             const timePerWord = duration / totalWords;
 
-            // Update setiap 100ms untuk smooth
             wordHighlightInterval = setInterval(() => {
                 const currentTime = audio.currentTime;
                 const wordIndex = Math.floor(currentTime / timePerWord);
 
                 if (wordIndex >= totalWords) {
-                    // Semua kata sudah dibaca
                     words.forEach(w => w.classList.add('read-word'));
                     if (lastActiveWord) lastActiveWord.classList.remove('active-word');
                     return;
                 }
 
-                // Hapus highlight dari kata sebelumnya
                 if (lastActiveWord && lastActiveWord !== words[wordIndex]) {
                     lastActiveWord.classList.remove('active-word');
                     lastActiveWord.classList.add('read-word');
                 }
 
-                // Tambah highlight ke kata sekarang
                 if (words[wordIndex]) {
                     words[wordIndex].classList.add('active-word');
                     lastActiveWord = words[wordIndex];
@@ -344,7 +365,6 @@
             });
         }
 
-        // Handle individual play
         document.querySelectorAll('.audio-player').forEach(audio => {
             audio.addEventListener('play', function() {
                 const ayatId = this.getAttribute('data-ayat-id');
@@ -354,10 +374,6 @@
                 document.querySelectorAll('.audio-player').forEach(a => {
                     if (a !== this) a.pause();
                 });
-            });
-
-            audio.addEventListener('pause', function() {
-                // Biarkan highlight tetap di posisi terakhir
             });
         });
     </script>
