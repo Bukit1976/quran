@@ -105,4 +105,14 @@ class UserSetting extends Model
             default => 'Diklik'
         };
     }
+    public function getQoriBaseUrl()
+    {
+        return match ($this->qori_murattal) {
+            'abdul_basit' => 'https://everyayah.com/data/Abdul_Basit_128kbps/',
+            'maher_almuaiqly' => 'https://everyayah.com/data/Maher_AlMuaiqly_128kbps/',
+            'saad_ghamdi' => 'https://everyayah.com/data/Saad_AlGhamdi_128kbps/',
+            'ahmad_alajamy' => 'https://everyayah.com/data/Ahmad_ibn_Ali_al-Ajamy_128kbps/',
+            default => 'https://everyayah.com/data/Alafasy_128kbps/'
+        };
+    }
 }

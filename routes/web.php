@@ -66,6 +66,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    // Tambahkan route ini di dalam group middleware auth
+    Route::delete('/hafalan/{hafalan}', [HafalanController::class, 'destroy'])->name('hafalan.destroy');
     // ==========================================
     // SETTINGS (PENGATURAN) - DIRAPIKAN & DISEMPURNAKAN
     // ==========================================

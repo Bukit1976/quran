@@ -20,6 +20,50 @@
     <meta name="theme-color" content="#10b981">
     <title>@yield('title', 'HafalQuran')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Apply User Settings --}}
+    @if (isset($userSettings))
+        <style>
+            /* Font Sizes */
+            .quran-text {
+                font-size: {{ $userSettings->ukuran_font_arabic ?? 18 }}px !important;
+            }
+
+            .latin-text {
+                font-size: {{ $userSettings->ukuran_font_latin ?? 16 }}px !important;
+                display: {{ $userSettings->aktifkan_latin ? 'block' : 'none' }} !important;
+            }
+
+            .translation-text {
+                font-size: {{ $userSettings->ukuran_font_terjemahan ?? 16 }}px !important;
+                display: {{ $userSettings->aktifkan_terjemahan ? 'block' : 'none' }} !important;
+            }
+
+            /* Tajwid Colors */
+            @if (!$userSettings->tajwid_berwarna)
+                .quran-word {
+                    color: inherit !important;
+                    text-shadow: none !important;
+                }
+            @endif
+
+            /* Theme */
+            @if ($userSettings->tema_aplikasi === 'gelap')
+                html {
+                    filter: invert(1) hue-rotate(180deg);
+                }
+
+                img,
+                video,
+                canvas {
+                    filter: invert(1) hue-rotate(180deg);
+                }
+            @elseif($userSettings->tema_aplikasi === 'terang')
+                html.dark {
+                    filter: none !important;
+                }
+            @endif
+        </style>
+    @endif
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -50,14 +94,8 @@
                 <div class="flex h-16 justify-between">
                     <div class="flex flex-1 items-center justify-between md:justify-start">
                         <a href="{{ route('dashboard') }}" class="group flex flex-shrink-0 items-center space-x-3">
-                            <div
-                                class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                            </div>
+                            <img src="{{ asset('Logo/LogoNew.png') }}" alt="HafalQuran Logo"
+                                class="h-10 w-auto rounded-xl">
                             <span class="text-lg font-bold text-gray-900 dark:text-white">HafalQuran</span>
                         </a>
                         <button @click="mobileMenuOpen = !mobileMenuOpen"

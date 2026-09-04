@@ -97,7 +97,7 @@
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" class="setting-toggle peer sr-only" id="toggle-tajwid_berwarna"
-                                    {{ $settings->tajwid_berwarna ? 'checked' : '' }}>
+                                    {{ $settings->tajwid_berwarna ? 'checked' : '' }} data-field="tajwid_berwarna">
                                 <div
                                     class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700">
                                 </div>
@@ -138,7 +138,7 @@
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" class="setting-toggle peer sr-only" id="toggle-aktifkan_latin"
-                                    {{ $settings->aktifkan_latin ? 'checked' : '' }}>
+                                    {{ $settings->aktifkan_latin ? 'checked' : '' }} data-field="aktifkan_latin">
                                 <div
                                     class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700">
                                 </div>
@@ -179,7 +179,8 @@
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" class="setting-toggle peer sr-only"
-                                    id="toggle-aktifkan_terjemahan" {{ $settings->aktifkan_terjemahan ? 'checked' : '' }}>
+                                    id="toggle-aktifkan_terjemahan" {{ $settings->aktifkan_terjemahan ? 'checked' : '' }}
+                                    data-field="aktifkan_terjemahan">
                                 <div
                                     class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700">
                                 </div>
@@ -278,7 +279,8 @@
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" class="setting-toggle peer sr-only"
                                     id="toggle-biarkan_layar_menyala"
-                                    {{ $settings->biarkan_layar_menyala ? 'checked' : '' }}>
+                                    {{ $settings->biarkan_layar_menyala ? 'checked' : '' }}
+                                    data-field="biarkan_layar_menyala">
                                 <div
                                     class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700">
                                 </div>
@@ -302,10 +304,9 @@
             fontMax = 48;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Auto-binding untuk semua checkbox dengan class 'setting-toggle'
             document.querySelectorAll('input.setting-toggle').forEach(toggle => {
                 toggle.addEventListener('change', function() {
-                    const field = this.id.replace('toggle-', '');
+                    const field = this.getAttribute('data-field') || this.id.replace('toggle-', '');
                     const value = this.checked;
 
                     fetch('/pengaturan/toggle', {
@@ -321,20 +322,16 @@
                                 value: value
                             })
                         })
-                        .then(res => {
-                            if (!res.ok) throw new Error('Network response was not ok');
-                            return res.json();
-                        })
+                        .then(res => res.json())
                         .then(data => {
                             if (data.success) {
-                                showNotif(data.message || 'Pengaturan berhasil disimpan!');
+                                showNotif('Pengaturan berhasil disimpan!');
                             } else {
                                 this.checked = !value;
-                                showNotif(data.message || 'Gagal menyimpan pengaturan.');
+                                showNotif('Gagal menyimpan pengaturan.');
                             }
                         })
-                        .catch(err => {
-                            console.error('Toggle Error:', err);
+                        .catch(() => {
                             this.checked = !value;
                             showNotif('Gagal terhubung ke server.');
                         });
@@ -342,14 +339,12 @@
             });
         });
 
-        // 2. Select Option Handler
         function selectOption(field, value, labelId, label, modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.querySelectorAll('.option-button').forEach(btn => {
                     const btnValue = btn.getAttribute('data-value');
                     const flexDiv = btn.querySelector('.flex');
-
                     if (btnValue === value) {
                         btn.classList.remove('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100',
                             'dark:hover:bg-gray-800');
@@ -395,28 +390,21 @@
                         if (labelElement) labelElement.textContent = data.label || label;
                         setTimeout(() => {
                             closeModal(modalId);
-                            showNotif(data.message || 'Pengaturan berhasil disimpan!');
+                            showNotif('Pengaturan berhasil disimpan!');
                         }, 300);
                     }
-                })
-                .catch(err => {
-                    console.error('Select Error:', err);
-                    showNotif('Gagal terhubung ke server.');
                 });
         }
 
-        // 3. Font Size Handler
         function openFontModal(field) {
             currentFontField = field;
             const labelEl = document.getElementById(`label-${field}`);
             currentFontSize = labelEl ? parseInt(labelEl.textContent) : 18;
-
             const titles = {
                 'ukuran_font_arabic': 'Ukuran Font Arabic',
                 'ukuran_font_latin': 'Ukuran Font Latin',
                 'ukuran_font_terjemahan': 'Ukuran Font Terjemahan'
             };
-
             const subtitleEl = document.getElementById('font-modal-subtitle');
             const displayEl = document.getElementById('font-size-display');
             if (subtitleEl) subtitleEl.textContent = titles[field] || 'Ukuran Font';
@@ -449,16 +437,11 @@
                         const labelEl = document.getElementById(`label-${currentFontField}`);
                         if (labelEl) labelEl.textContent = data.value;
                         closeModal('modal-font');
-                        showNotif(data.message || 'Ukuran font berhasil disimpan!');
+                        showNotif('Ukuran font berhasil disimpan!');
                     }
-                })
-                .catch(err => {
-                    console.error('Font Error:', err);
-                    showNotif('Gagal terhubung ke server.');
                 });
         }
 
-        // 4. Modal Utilities
         function openModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
@@ -499,7 +482,6 @@
             openModal('modal-popup');
         }
 
-        // 5. Notification System
         function showNotif(message) {
             document.querySelectorAll('.toast-notification').forEach(el => el.remove());
             const notif = document.createElement('div');
@@ -507,24 +489,18 @@
                 'toast-notification fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 opacity-0 -translate-y-4';
             notif.textContent = message;
             document.body.appendChild(notif);
-
-            requestAnimationFrame(() => {
-                notif.classList.remove('opacity-0', '-translate-y-4');
-            });
-
+            requestAnimationFrame(() => notif.classList.remove('opacity-0', '-translate-y-4'));
             setTimeout(() => {
                 notif.classList.add('opacity-0', '-translate-y-4');
                 setTimeout(() => notif.remove(), 300);
             }, 2500);
         }
 
-        // 6. Keyboard Handler
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 ['modal-tema', 'modal-mode', 'modal-jenis', 'modal-font', 'modal-penerjemah', 'modal-qori',
                     'modal-popup'
-                ]
-                .forEach(modalId => closeModal(modalId));
+                ].forEach(modalId => closeModal(modalId));
             }
         });
     </script>

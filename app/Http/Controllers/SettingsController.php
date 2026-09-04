@@ -10,6 +10,7 @@ class SettingsController extends Controller
 {
     public function index()
     {
+        // $userSettings sudah otomatis tersedia di semua view berkat AppServiceProvider
         $settings = UserSetting::getOrCreate(Auth::user()->id);
         return view('settings.index', compact('settings'));
     }
@@ -32,7 +33,6 @@ class SettingsController extends Controller
             return response()->json(['success' => false, 'message' => 'Field tidak valid'], 400);
         }
 
-        // Konversi manual - terima "true", "false", true, false, 1, 0
         $booleanValue = ($value === true || $value === 'true' || $value === '1' || $value === 1);
 
         $settings = UserSetting::getOrCreate(Auth::user()->id);
@@ -52,9 +52,20 @@ class SettingsController extends Controller
         $settings = UserSetting::getOrCreate(Auth::user()->id);
         $settings->update([$field => $value]);
 
+        $label = match ($field) {
+            'tema_aplikasi' => $settings->getTemaLabel(),
+            'mode_baca_quran' => $settings->getModeBacaLabel(),
+            'jenis_penulisan_arabic' => $settings->getJenisPenulisanLabel(),
+            'penerjemah' => $settings->getPenerjemahLabel(),
+            'qori_murattal' => $settings->getQoriLabel(),
+            'aksi_popup_ayat' => $settings->getAksiPopupLabel(),
+            default => $value
+        };
+
         return response()->json([
             'success' => true,
-            'message' => 'Berhasil disimpan'
+            'message' => 'Berhasil disimpan',
+            'label' => $label
         ]);
     }
 
@@ -68,7 +79,8 @@ class SettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Berhasil disimpan'
+            'message' => 'Berhasil disimpan',
+            'value' => $value
         ]);
     }
 }

@@ -11,7 +11,7 @@ class Murajaah extends Model
 
     protected $fillable = [
         'user_id',
-        'ayah_id',
+        'ayat_id',              // ← SUDAH DIPERBAIKI
         'tanggal_murajaah',
         'status',
     ];
@@ -25,8 +25,8 @@ class Murajaah extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function ayah()
+    public function ayat()          // ← SUDAH DIPERBAIKI
     {
-        return $this->belongsTo(Ayah::class);
+        return $this->belongsTo(Ayat::class);  // ← SUDAH DIPERBAIKI
     }
 }

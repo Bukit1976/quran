@@ -79,4 +79,25 @@ class HafalanController extends Controller
 
         return redirect()->back()->with('success', 'Status hafalan berhasil diperbarui');
     }
+    public function destroy($hafalanId)
+    {
+        $user = Auth::user();
+
+        $hafalan = Hafalan::where('user_id', $user->id)
+            ->where('id', $hafalanId)
+            ->first();
+
+        if ($hafalan) {
+            // Hapus juga jadwal murajaah yang terkait
+            Murajaah::where('user_id', $user->id)
+                ->where('ayat_id', $hafalan->ayat_id)
+                ->delete();
+
+            $hafalan->delete();
+
+            return redirect()->back()->with('success', 'Hafalan berhasil dihapus');
+        }
+
+        return redirect()->back()->with('error', 'Hafalan tidak ditemukan');
+    }
 }
