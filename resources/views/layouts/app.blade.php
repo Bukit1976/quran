@@ -116,6 +116,7 @@
                                     ['route' => 'hafalan.index', 'label' => 'Hafalan'],
                                     ['route' => 'murajaah.index', 'label' => 'Murajaah'],
                                     ['route' => 'jadwal-sholat.index', 'label' => 'Jadwal Sholat'],
+                                    ['route' => 'alarm.index', 'label' => 'Alarm'],
                                     ['route' => 'doa.index', 'label' => 'Doa'],
                                     ['route' => 'tes.index', 'label' => 'Tes'],
                                     ['route' => 'statistik.index', 'label' => 'Statistik'],

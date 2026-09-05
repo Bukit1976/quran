@@ -13,6 +13,7 @@ use App\Http\Controllers\TesController;
 use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\JuzController;
+use App\Http\Controllers\AlarmController;
 
 // ==========================================
 // Route Utama (Redirect berdasarkan status login)
@@ -97,6 +98,15 @@ Route::middleware(['auth'])->group(function () {
     // ==========================================
     Route::get('/jadwal-sholat', [App\Http\Controllers\JadwalSholatController::class, 'index'])->name('jadwal-sholat.index');
     Route::get('/api/jadwal-sholat', [App\Http\Controllers\JadwalSholatController::class, 'getJadwal'])->name('jadwal-sholat.api');
+
+    // ==========================================
+    // ALARM ROUTES - SEDERHANA, PAKAI POST SEMUA
+    // ==========================================
+    Route::get('/alarm', [App\Http\Controllers\AlarmController::class, 'index'])->name('alarm.index');
+    Route::post('/alarm', [App\Http\Controllers\AlarmController::class, 'storeOrUpdate'])->name('alarm.store');
+    Route::delete('/alarm/{alarm}', [App\Http\Controllers\AlarmController::class, 'destroy'])->name('alarm.destroy');
+    Route::post('/alarm/{alarm}/toggle', [App\Http\Controllers\AlarmController::class, 'toggle'])->name('alarm.toggle');
+
     // Halaman Tambahan
     Route::get('/audio-manager', function () {
         return view('audio-manager');
