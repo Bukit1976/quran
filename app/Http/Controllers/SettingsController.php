@@ -10,7 +10,6 @@ class SettingsController extends Controller
 {
     public function index()
     {
-        // $userSettings sudah otomatis tersedia di semua view berkat AppServiceProvider
         $settings = UserSetting::getOrCreate(Auth::user()->id);
         return view('settings.index', compact('settings'));
     }
@@ -49,15 +48,33 @@ class SettingsController extends Controller
         $field = $request->input('field');
         $value = $request->input('value');
 
+        // Validasi field qori_murotall
+        if ($field === 'qori_murotall') {
+            $allowedQoris = [
+                'mishary_rashid',
+                'abdul_basit',
+                'maher_almuaiqly',
+                'saad_ghamdi',
+                'ahmad_alajamy'
+            ];
+
+            if (!in_array($value, $allowedQoris)) {
+                return response()->json(['success' => false, 'message' => 'Qori tidak valid'], 400);
+            }
+        }
+
         $settings = UserSetting::getOrCreate(Auth::user()->id);
         $settings->update([$field => $value]);
+
+        // Force reload dari database
+        $settings->refresh();
 
         $label = match ($field) {
             'tema_aplikasi' => $settings->getTemaLabel(),
             'mode_baca_quran' => $settings->getModeBacaLabel(),
             'jenis_penulisan_arabic' => $settings->getJenisPenulisanLabel(),
             'penerjemah' => $settings->getPenerjemahLabel(),
-            'qori_murattal' => $settings->getQoriLabel(),
+            'qori_murotall' => $settings->getQoriLabel(),
             'aksi_popup_ayat' => $settings->getAksiPopupLabel(),
             default => $value
         };
@@ -65,7 +82,8 @@ class SettingsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Berhasil disimpan',
-            'label' => $label
+            'label' => $label,
+            'current_value' => $settings->$field // Tambahkan ini untuk debug
         ]);
     }
 

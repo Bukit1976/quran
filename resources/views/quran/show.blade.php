@@ -18,21 +18,41 @@
 
 @section('content')
     @php
-        // Dapatkan base URL qori dari settings
-        $qoriBaseUrl = 'https://everyayah.com/data/Alafasy_128kbps/';
+        // Map nama qori ke folder URL yang BENAR di server everyayah.com
+        $qoriMap = [
+            'mishary_rashid' => 'Alafasy_128kbps',
+            'abdul_basit_murattal' => 'Abdul_Basit_Murattal_128kbps',
+            'abdul_basit_mujawwad' => 'Abdul_Basit_Mujawwad_128kbps',
+            'maher_almuaiqly' => 'Maher_AlMuaiqly_64kbps',
+            'saad_ghamdi' => 'Saad_Al-Ghamadi_128kbps',
+            'ahmad_alajamy' => 'Ahmad_ibn_Ali_al-Ajamy_128kbps',
+            'husary' => 'Husary_128kbps',
+            'minshawi_murattal' => 'Minshawy_128kbps',
+            'minshawi_mujawwad' => 'Minshawy_Mujawwad_128kbps',
+            'muhammad_ayyoub' => 'Muhammad_Ayyoub_128kbps',
+            'muhammad_jibreel' => 'Muhammad_Jibreel_128kbps',
+            'sudais' => 'Abdurrahmaan_As-Sudais_192kbps',
+            'abu_bakr_ash_shaatree' => 'Abu_Bakr_Ash-Shaatree_128kbps',
+            'hani_ar_rifai' => 'Hani_Ar-Rifai_192kbps',
+            'mahmood_ali_albanna' => 'Mahmood_Ali_AlBanna_128kbps',
+            'muhammad_saleh_almunajjid' => 'Muhammad_Saleh_AlMunajjid_128kbps',
+            'saud_ash_shuraim' => 'Saud_Ash-Shuraim_128kbps',
+            'nasser_alqatami' => 'Nasser_Alqatami_128kbps',
+            'yasser_ad_dossari' => 'Yasser_Ad-Dossari_128kbps',
+            'khalid_aljileel' => 'Khalid_AlJileel_128kbps',
+            'bandar_baleela' => 'Bandar_Baleela_128kbps',
+            'ali_alhudhaifi' => 'Ali_AlHudhaifi_128kbps',
+            'fares_abbad' => 'Fares_Abbad_128kbps',
+            'salah_bukhatir' => 'Salah_Bukhatir_128kbps',
+            'ibrahim_akhdar' => 'Ibrahim_Akhdar_32kbps',
+            'ahmed_neana' => 'Ahmed_Neana_128kbps',
+        ];
 
-        if (isset($userSettings) && $userSettings) {
-            $qoriBaseUrl = match ($userSettings->qori_murattal) {
-                'abdul_basit' => 'https://everyayah.com/data/Abdul_Basit_128kbps/',
-                'maher_almuaiqly' => 'https://everyayah.com/data/Maher_AlMuaiqly_128kbps/',
-                'saad_ghamdi' => 'https://everyayah.com/data/Saad_AlGhamdi_128kbps/',
-                'ahmad_alajamy' => 'https://everyayah.com/data/Ahmad_ibn_Ali_al-Ajamy_128kbps/',
-                default => 'https://everyayah.com/data/Alafasy_128kbps/',
-            };
-        }
+        $selectedQori = isset($userSettings) ? trim($userSettings->qori_murattal) : 'mishary_rashid';
+        $qoriFolder = $qoriMap[$selectedQori] ?? 'Alafasy_128kbps';
+        $qoriBaseUrl = 'https://everyayah.com/data/' . $qoriFolder . '/';
     @endphp
 
-    {{-- Container utama dengan dark mode support --}}
     <div class="min-h-screen bg-gray-50 transition-colors duration-300 dark:bg-gray-900">
 
         {{-- Tombol Kontrol Audio --}}
@@ -70,15 +90,13 @@
 
         <div class="space-y-4 px-4 py-6 sm:space-y-6 sm:px-6 lg:px-8">
 
-            {{-- BISMILLAH DENGAN AUDIO --}}
+            {{-- BISMILLAH --}}
             @if ($surah->nomor != 9 && $surah->nomor != 1)
                 <div id="ayat-container-bismillah"
                     class="ayat-container rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm transition-all duration-500 dark:border-gray-700 dark:bg-gray-800 sm:p-6">
                     <div class="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                         <span
-                            class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 sm:text-sm">
-                            Basmalah
-                        </span>
+                            class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 sm:text-sm">Basmalah</span>
                         <div class="flex w-full items-center justify-between gap-2 sm:w-auto">
                             <button onclick="toggleAyat('bismillah')" id="btn-play-bismillah"
                                 class="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-600 sm:gap-2 sm:px-4 sm:text-sm">
@@ -94,17 +112,13 @@
                                 </svg>
                                 <span id="text-play-bismillah">Putar</span>
                             </button>
-                            <audio id="audio-bismillah" class="hidden" data-ayat-id="bismillah" data-index="-1">
-                                <source src="{{ $qoriBaseUrl }}001001.mp3" type="audio/mpeg">
-                            </audio>
+                            <audio id="audio-bismillah" class="hidden" data-ayat-id="bismillah" data-index="-1"
+                                src="https://everyayah.com/data/Alafasy_128kbps/001001.mp3"></audio>
                         </div>
                     </div>
-
                     <div class="font-arabic quran-text mb-4 text-right text-2xl text-gray-900 dark:text-white sm:text-3xl lg:text-4xl"
                         id="ayat-text-bismillah" dir="rtl">
-                        @php
-                            $words = preg_split('/\s+/', trim('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'));
-                        @endphp
+                        @php $words = preg_split('/\s+/', trim('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')); @endphp
                         @foreach ($words as $wIdx => $word)
                             <span class="quran-word" data-word-index="{{ $wIdx }}">{{ $word }}</span>
                         @endforeach
@@ -112,7 +126,6 @@
                 </div>
             @endif
 
-            {{-- Cek apakah ada Ayat 1 di database --}}
             @php
                 $firstAyat = $surah->ayats->first();
                 $hasAyat1 = $firstAyat && $firstAyat->nomor_ayat == 1;
@@ -121,23 +134,31 @@
             @if (!$hasAyat1 && $surah->nomor != 1)
                 <div
                     class="rounded-xl border-2 border-yellow-400 bg-yellow-50 p-4 dark:border-yellow-600 dark:bg-yellow-900/20">
-                    <p class="text-sm text-yellow-800 dark:text-yellow-300">
-                        <strong>⚠️ Catatan:</strong> Database tidak memiliki Ayat 1 untuk surah ini.
-                    </p>
+                    <p class="text-sm text-yellow-800 dark:text-yellow-300"><strong>⚠️ Catatan:</strong> Database tidak
+                        memiliki Ayat 1 untuk surah ini.</p>
                 </div>
             @endif
 
             {{-- Daftar Ayat --}}
             @foreach ($surah->ayats as $index => $ayat)
-                {{-- TAMBAHAN: scroll-mt-28 agar tidak tertutup header saat di-scroll otomatis --}}
+                @php
+                    $originalUrl = $ayat->audio_url;
+                    $currentAudioUrl = $originalUrl;
+                    if ($originalUrl) {
+                        $currentAudioUrl = preg_replace(
+                            '#https://everyayah\.com/data/[^/]+/#',
+                            'https://everyayah.com/data/' . $qoriFolder . '/',
+                            $originalUrl,
+                        );
+                    }
+                @endphp
+
                 <div id="ayat-container-{{ $ayat->id }}"
                     class="ayat-container scroll-mt-28 rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm transition-all duration-500 dark:border-gray-700 dark:bg-gray-800 sm:p-6">
-
                     <div class="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                         <span
-                            class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 sm:text-sm">
-                            Ayat {{ $ayat->nomor_ayat }}
-                        </span>
+                            class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 sm:text-sm">Ayat
+                            {{ $ayat->nomor_ayat }}</span>
                         <div class="flex w-full items-center justify-between gap-2 sm:w-auto">
                             @if ($ayat->audio_url)
                                 <button onclick="toggleAyat({{ $ayat->id }})" id="btn-play-{{ $ayat->id }}"
@@ -156,25 +177,19 @@
                                 </button>
 
                                 <audio id="audio-{{ $ayat->id }}" class="hidden" data-ayat-id="{{ $ayat->id }}"
-                                    data-index="{{ $index }}">
-                                    <source
-                                        src="{{ $qoriBaseUrl }}{{ str_pad($surah->nomor, 3, '0', STR_PAD_LEFT) }}{{ str_pad($ayat->nomor_ayat, 3, '0', STR_PAD_LEFT) }}.mp3"
-                                        type="audio/mpeg">
-                                </audio>
+                                    data-index="{{ $index }}" data-original-url="{{ $originalUrl }}"
+                                    src="{{ $currentAudioUrl }}"></audio>
                             @endif
 
                             <a href="{{ route('hafalan.mulai', $ayat->id) }}"
-                                class="flex-shrink-0 whitespace-nowrap rounded-lg bg-emerald-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-600 sm:text-sm">
-                                Mulai Hafal
-                            </a>
+                                class="flex-shrink-0 whitespace-nowrap rounded-lg bg-emerald-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-600 sm:text-sm">Mulai
+                                Hafal</a>
                         </div>
                     </div>
 
                     <div class="font-arabic quran-text mb-4 text-right text-2xl text-gray-900 dark:text-white sm:text-3xl lg:text-4xl"
                         id="ayat-text-{{ $ayat->id }}" dir="rtl">
-                        @php
-                            $words = preg_split('/\s+/', trim($ayat->teks_arab));
-                        @endphp
+                        @php $words = preg_split('/\s+/', trim($ayat->teks_arab)); @endphp
                         @foreach ($words as $wIdx => $word)
                             <span class="quran-word" data-word-index="{{ $wIdx }}">{{ $word }}</span>
                         @endforeach
@@ -183,21 +198,17 @@
                     @if ($ayat->transliterasi && trim($ayat->transliterasi) != '')
                         <div class="mb-3 rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
                             <p class="text-sm italic text-emerald-700 dark:text-emerald-300 sm:text-base">
-                                {{ $ayat->transliterasi }}
-                            </p>
+                                {{ $ayat->transliterasi }}</p>
                         </div>
                     @endif
 
                     <div class="border-t border-gray-200 pt-3 dark:border-gray-700">
-                        <p class="text-sm text-gray-700 dark:text-gray-300 sm:text-base">
-                            {{ $ayat->terjemahan }}
-                        </p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 sm:text-base">{{ $ayat->terjemahan }}</p>
                     </div>
 
                     @if ($ayat->audio_url)
                         <div class="mt-3 text-right">
-                            <a href="{{ $qoriBaseUrl }}{{ str_pad($surah->nomor, 3, '0', STR_PAD_LEFT) }}{{ str_pad($ayat->nomor_ayat, 3, '0', STR_PAD_LEFT) }}.mp3"
-                                download
+                            <a href="{{ $currentAudioUrl }}" download
                                 class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -212,9 +223,8 @@
 
             <div class="mt-6 pb-8 text-center">
                 <a href="{{ route('quran.index') }}"
-                    class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
-                    ← Kembali ke Daftar Surah
-                </a>
+                    class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">←
+                    Kembali ke Daftar Surah</a>
             </div>
         </div>
     </div>
@@ -296,7 +306,17 @@
                     }
                 });
 
-                audio.play();
+                audio.play().catch(function(error) {
+                    console.warn('Gagal memutar audio, mencoba fallback:', error);
+                    const originalUrl = audio.getAttribute('data-original-url');
+                    if (originalUrl) {
+                        audio.src = originalUrl;
+                        audio.play().catch(function(err2) {
+                            console.error('Fallback juga gagal:', err2);
+                        });
+                    }
+                });
+
                 updateButton(ayatId, true);
                 highlightAyat(ayatId);
                 startSmoothHighlight(audio, ayatId);
@@ -336,7 +356,6 @@
 
         function startSmoothHighlight(audio, ayatId) {
             stopSmoothHighlight();
-
             const textContainer = document.getElementById('ayat-text-' + ayatId);
             if (!textContainer) return;
 
@@ -352,14 +371,12 @@
 
             const updateHighlight = () => {
                 if (audio.paused || audio.ended) return;
-
                 const currentTime = audio.currentTime;
                 const duration = audio.duration;
                 if (!duration || duration <= 0) return;
 
                 const progress = currentTime / duration;
                 let wordIndex = Math.floor(progress * totalWords);
-
                 if (wordIndex >= totalWords) wordIndex = totalWords - 1;
                 if (wordIndex < 0) wordIndex = 0;
 
@@ -374,7 +391,6 @@
                         w.classList.remove('active-word', 'read-word');
                     }
                 });
-
                 rafId = requestAnimationFrame(updateHighlight);
             };
 
@@ -416,8 +432,19 @@
             audio.play().then(() => {
                 startSmoothHighlight(audio, ayatId);
             }).catch(err => {
-                console.error('Error:', err);
-                if (isPlayingAll) setTimeout(() => playAyatByIndex(index + 1), 500);
+                console.warn('Gagal memutar, mencoba fallback:', err);
+                const originalUrl = audio.getAttribute('data-original-url');
+                if (originalUrl && audio.src !== originalUrl) {
+                    audio.src = originalUrl;
+                    audio.play().then(() => {
+                            startSmoothHighlight(audio, ayatId);
+                        })
+                        .catch(err2 => {
+                            if (isPlayingAll) setTimeout(() => playAyatByIndex(index + 1), 500);
+                        });
+                } else {
+                    if (isPlayingAll) setTimeout(() => playAyatByIndex(index + 1), 500);
+                }
             });
 
             audio.onended = function() {
@@ -429,7 +456,6 @@
             audio.onerror = function() {
                 stopSmoothHighlight();
                 updateButton(ayatId, false);
-                if (isPlayingAll) setTimeout(() => playAyatByIndex(index + 1), 500);
             };
         }
 
@@ -449,11 +475,11 @@
         }
 
         function downloadAll() {
-            const audios = document.querySelectorAll('audio.hidden source');
-            audios.forEach((source, index) => {
+            const audios = document.querySelectorAll('audio.hidden');
+            audios.forEach((audio, index) => {
                 setTimeout(() => {
                     const link = document.createElement('a');
-                    link.href = source.src;
+                    link.href = audio.src;
                     link.download = 'ayat-' + (index + 1) + '.mp3';
                     link.click();
                 }, index * 1000);
@@ -461,37 +487,23 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================
-            // FITUR BARU: AUTO-SCROLL & HIGHLIGHT DARI LINK LUAR
-            // ==========================================
-            const hash = window.location.hash; // Contoh: "#ayat-123" atau "#123"
+            const hash = window.location.hash;
             if (hash) {
-                // Bersihkan tanda '#' dan prefix 'ayat-' jika ada
                 let targetId = hash.replace('#', '').replace('ayat-', '');
-
-                // Cari elemen container ayat yang sesuai
                 const targetElement = document.getElementById('ayat-container-' + targetId);
-
                 if (targetElement) {
-                    // Tunggu 300ms agar halaman benar-benar selesai dimuat
                     setTimeout(() => {
-                        // 1. Scroll halus ke tengah layar
                         targetElement.scrollIntoView({
                             behavior: 'smooth',
                             block: 'center'
                         });
-
-                        // 2. Tambahkan efek highlight (class .active sudah ada di CSS Anda)
                         targetElement.classList.add('active');
-
-                        // 3. Hilangkan highlight setelah 3 detik agar tidak mengganggu
                         setTimeout(() => {
                             targetElement.classList.remove('active');
                         }, 3000);
                     }, 300);
                 }
             }
-            // ==========================================
 
             getAllAudios().forEach(audio => {
                 audio.addEventListener('play', function() {
@@ -499,13 +511,11 @@
                     highlightAyat(ayatId);
                     startSmoothHighlight(this, ayatId);
                 });
-
                 audio.addEventListener('pause', function() {
                     const ayatId = this.getAttribute('data-ayat-id');
                     updateButton(ayatId, false);
                     stopSmoothHighlight();
                 });
-
                 audio.addEventListener('ended', function() {
                     const ayatId = this.getAttribute('data-ayat-id');
                     updateButton(ayatId, false);

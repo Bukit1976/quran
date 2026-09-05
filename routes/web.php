@@ -90,6 +90,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/reset', [SettingsController::class, 'resetSettings'])->name('reset');
     });
 
+    // Kumpulan Doa
+    Route::get('/doa', [App\Http\Controllers\DoaController::class, 'index'])->name('doa.index');
+    // ==========================================
+    // JADWAL SHOLAT
+    // ==========================================
+    Route::get('/jadwal-sholat', [App\Http\Controllers\JadwalSholatController::class, 'index'])->name('jadwal-sholat.index');
+    Route::get('/api/jadwal-sholat', [App\Http\Controllers\JadwalSholatController::class, 'getJadwal'])->name('jadwal-sholat.api');
     // Halaman Tambahan
     Route::get('/audio-manager', function () {
         return view('audio-manager');

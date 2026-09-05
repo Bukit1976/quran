@@ -20,8 +20,7 @@
                         onclick="selectOption('tema_aplikasi', '{{ $key }}', 'label-tema', '{{ $label }}', 'modal-tema')"
                         class="option-button {{ ($settings->tema_aplikasi ?? 'mengikuti_perangkat') === $key ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-200' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }} w-full rounded-xl px-4 py-3 text-left transition-colors"
                         data-value="{{ $key }}">
-                        <div class="flex items-center justify-between">
-                            <span>{{ $label }}</span>
+                        <div class="flex items-center justify-between"><span>{{ $label }}</span>
                             @if (($settings->tema_aplikasi ?? 'mengikuti_perangkat') === $key)
                                 <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -33,8 +32,7 @@
                     </button>
                 @endforeach
             </div>
-            <div class="mt-6 flex gap-3">
-                <button onclick="closeModal('modal-tema')"
+            <div class="mt-6 flex gap-3"><button onclick="closeModal('modal-tema')"
                     class="flex-1 rounded-xl bg-gray-200 py-3 font-medium text-gray-700 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">Batal</button>
             </div>
         </div>
@@ -63,8 +61,7 @@
                         onclick="selectOption('mode_baca_quran', '{{ $key }}', 'label-mode', '{{ $label }}', 'modal-mode')"
                         class="option-button {{ ($settings->mode_baca_quran ?? 'selalu_tanya') === $key ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-200' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }} w-full rounded-xl px-4 py-3 text-left transition-colors"
                         data-value="{{ $key }}">
-                        <div class="flex items-center justify-between">
-                            <span>{{ $label }}</span>
+                        <div class="flex items-center justify-between"><span>{{ $label }}</span>
                             @if (($settings->mode_baca_quran ?? 'selalu_tanya') === $key)
                                 <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -76,8 +73,7 @@
                     </button>
                 @endforeach
             </div>
-            <div class="mt-6 flex gap-3">
-                <button onclick="closeModal('modal-mode')"
+            <div class="mt-6 flex gap-3"><button onclick="closeModal('modal-mode')"
                     class="flex-1 rounded-xl bg-gray-200 py-3 font-medium text-gray-700 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">Batal</button>
             </div>
         </div>
@@ -106,8 +102,7 @@
                         onclick="selectOption('jenis_penulisan_arabic', '{{ $key }}', 'label-jenis', '{{ $label }}', 'modal-jenis')"
                         class="option-button {{ ($settings->jenis_penulisan_arabic ?? 'indopak') === $key ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-200' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }} w-full rounded-xl px-4 py-3 text-left transition-colors"
                         data-value="{{ $key }}">
-                        <div class="flex items-center justify-between">
-                            <span>{{ $label }}</span>
+                        <div class="flex items-center justify-between"><span>{{ $label }}</span>
                             @if (($settings->jenis_penulisan_arabic ?? 'indopak') === $key)
                                 <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -119,8 +114,7 @@
                     </button>
                 @endforeach
             </div>
-            <div class="mt-6 flex gap-3">
-                <button onclick="closeModal('modal-jenis')"
+            <div class="mt-6 flex gap-3"><button onclick="closeModal('modal-jenis')"
                     class="flex-1 rounded-xl bg-gray-200 py-3 font-medium text-gray-700 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">Batal</button>
             </div>
         </div>
@@ -177,8 +171,7 @@
                         onclick="selectOption('penerjemah', '{{ $key }}', 'label-penerjemah', '{{ $label }}', 'modal-penerjemah')"
                         class="option-button {{ ($settings->penerjemah ?? 'kemenag-ri') === $key ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-200' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }} w-full rounded-xl px-4 py-3 text-left transition-colors"
                         data-value="{{ $key }}">
-                        <div class="flex items-center justify-between">
-                            <span>{{ $label }}</span>
+                        <div class="flex items-center justify-between"><span>{{ $label }}</span>
                             @if (($settings->penerjemah ?? 'kemenag-ri') === $key)
                                 <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -190,15 +183,16 @@
                     </button>
                 @endforeach
             </div>
-            <div class="mt-6 flex gap-3">
-                <button onclick="closeModal('modal-penerjemah')"
+            <div class="mt-6 flex gap-3"><button onclick="closeModal('modal-penerjemah')"
                     class="flex-1 rounded-xl bg-gray-200 py-3 font-medium text-gray-700 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">Batal</button>
             </div>
         </div>
     </div>
 </div>
 
-{{-- Modal Qori --}}
+{{-- ============================================ --}}
+{{-- Modal Qori - 26 QORI LENGKAP & BENAR --}}
+{{-- ============================================ --}}
 <div id="modal-qori" class="fixed inset-0 z-50 hidden">
     <div class="flex min-h-screen items-center justify-center p-4" onclick="closeModal('modal-qori')">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
@@ -214,8 +208,38 @@
                     </svg>
                 </button>
             </div>
-            <div class="space-y-2">
-                @foreach (['mishary_rashid' => 'Mishary Rashid', 'abdul_basit' => 'Abdul Basit', 'maher_almuaiqly' => 'Maher Al Muaiqly', 'saad_ghamdi' => 'Saad Al Ghamdi', 'ahmad_alajamy' => 'Ahmad Al Ajamy'] as $key => $label)
+            <div class="max-h-96 space-y-2 overflow-y-auto pr-2">
+                @php
+                    $daftarQori = [
+                        'mishary_rashid' => 'Mishary Rashid Alafasy',
+                        'abdul_basit_murattal' => 'Abdul Basit (Murattal)',
+                        'abdul_basit_mujawwad' => 'Abdul Basit (Mujawwad)',
+                        'maher_almuaiqly' => 'Maher Al Muaiqly',
+                        'saad_ghamdi' => 'Saad Al-Ghamadi',
+                        'ahmad_alajamy' => 'Ahmad Al-Ajamy',
+                        'husary' => 'Mahmoud Khalil Al-Husary',
+                        'minshawi_murattal' => 'Mohamed Siddiq El-Minshawi (Murattal)',
+                        'minshawi_mujawwad' => 'Mohamed Siddiq El-Minshawi (Mujawwad)',
+                        'muhammad_ayyoub' => 'Muhammad Ayyoub',
+                        'muhammad_jibreel' => 'Muhammad Jibreel',
+                        'sudais' => 'Abdurrahman As-Sudais',
+                        'abu_bakr_ash_shaatree' => 'Abu Bakr Ash-Shaatree',
+                        'hani_ar_rifai' => 'Hani Ar-Rifai',
+                        'mahmood_ali_albanna' => 'Mahmood Ali Al-Banna',
+                        'muhammad_saleh_almunajjid' => 'Muhammad Saleh Al-Munajjid',
+                        'saud_ash_shuraim' => 'Saud Ash-Shuraim',
+                        'nasser_alqatami' => 'Nasser Al-Qatami',
+                        'yasser_ad_dossari' => 'Yasser Ad-Dossari',
+                        'khalid_aljileel' => 'Khalid Al-Jileel',
+                        'bandar_baleela' => 'Bandar Baleela',
+                        'ali_alhudhaifi' => 'Ali Al-Hudhaifi',
+                        'fares_abbad' => 'Fares Abbad',
+                        'salah_bukhatir' => 'Salah Bukhatir',
+                        'ibrahim_akhdar' => 'Ibrahim Al-Akhdar',
+                        'ahmed_neana' => 'Ahmed Neana',
+                    ];
+                @endphp
+                @foreach ($daftarQori as $key => $label)
                     <button
                         onclick="selectOption('qori_murattal', '{{ $key }}', 'label-qori', '{{ $label }}', 'modal-qori')"
                         class="option-button {{ ($settings->qori_murattal ?? 'mishary_rashid') === $key ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-200' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }} w-full rounded-xl px-4 py-3 text-left transition-colors"
@@ -263,8 +287,7 @@
                         onclick="selectOption('aksi_popup_ayat', '{{ $key }}', 'label-popup', '{{ $label }}', 'modal-popup')"
                         class="option-button {{ ($settings->aksi_popup_ayat ?? 'diklik') === $key ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-200' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }} w-full rounded-xl px-4 py-3 text-left transition-colors"
                         data-value="{{ $key }}">
-                        <div class="flex items-center justify-between">
-                            <span>{{ $label }}</span>
+                        <div class="flex items-center justify-between"><span>{{ $label }}</span>
                             @if (($settings->aksi_popup_ayat ?? 'diklik') === $key)
                                 <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -276,8 +299,7 @@
                     </button>
                 @endforeach
             </div>
-            <div class="mt-6 flex gap-3">
-                <button onclick="closeModal('modal-popup')"
+            <div class="mt-6 flex gap-3"><button onclick="closeModal('modal-popup')"
                     class="flex-1 rounded-xl bg-gray-200 py-3 font-medium text-gray-700 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">Batal</button>
             </div>
         </div>

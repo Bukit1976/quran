@@ -5,24 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Surah;
+use App\Models\UserSetting; // Tambahkan ini agar tidak perlu pakai \App\Models\
 
 class SurahController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
         $surahs = Surah::orderBy('nomor', 'asc')->get();
         return view('quran.index', compact('surahs'));
     }
 
-    public function show($id)
+    // Tambahkan 'int' sebelum $id agar editor tahu ini adalah angka
+    public function show(int $id)
     {
-        $user = Auth::user();
-        // Memuat surah beserta ayat-ayat yang diurutkan berdasarkan nomor ayat
-        $surah = Surah::with(['ayats' => function ($query) {
-            $query->orderBy('nomor_ayat', 'asc');
-        }])->findOrFail($id);
+        $surah = Surah::with('ayats')->findOrFail($id);
 
-        return view('quran.show', compact('surah'));
+        // Gunakan Auth::id() yang lebih stabil dan dikenali editor
+        $userSettings = UserSetting::getOrCreate(Auth::id());
+
+        return view('quran.show', compact('surah', 'userSettings'));
     }
 }

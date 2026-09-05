@@ -115,6 +115,8 @@
                                     ['route' => 'juz.index', 'label' => 'Juz'],
                                     ['route' => 'hafalan.index', 'label' => 'Hafalan'],
                                     ['route' => 'murajaah.index', 'label' => 'Murajaah'],
+                                    ['route' => 'jadwal-sholat.index', 'label' => 'Jadwal Sholat'],
+                                    ['route' => 'doa.index', 'label' => 'Doa'],
                                     ['route' => 'tes.index', 'label' => 'Tes'],
                                     ['route' => 'statistik.index', 'label' => 'Statistik'],
                                     ['route' => 'ai.index', 'label' => 'AI'],

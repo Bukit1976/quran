@@ -302,8 +302,10 @@
         let currentFontSize = 18;
         const fontMin = 12,
             fontMax = 48;
+        let notificationTimeout = null; // Untuk mencegah notifikasi bertumpuk
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Toggle settings
             document.querySelectorAll('input.setting-toggle').forEach(toggle => {
                 toggle.addEventListener('change', function() {
                     const field = this.getAttribute('data-field') || this.id.replace('toggle-', '');
@@ -328,12 +330,12 @@
                                 showNotif('Pengaturan berhasil disimpan!');
                             } else {
                                 this.checked = !value;
-                                showNotif('Gagal menyimpan pengaturan.');
+                                showNotif('Gagal menyimpan pengaturan.', 'error');
                             }
                         })
                         .catch(() => {
                             this.checked = !value;
-                            showNotif('Gagal terhubung ke server.');
+                            showNotif('Gagal terhubung ke server.', 'error');
                         });
                 });
             });
@@ -371,6 +373,9 @@
                 });
             }
 
+            // Hapus notifikasi lama jika ada
+            clearNotification();
+
             fetch('/pengaturan/select', {
                     method: 'POST',
                     headers: {
@@ -388,11 +393,19 @@
                     if (data.success) {
                         const labelElement = document.getElementById(labelId);
                         if (labelElement) labelElement.textContent = data.label || label;
-                        setTimeout(() => {
-                            closeModal(modalId);
-                            showNotif('Pengaturan berhasil disimpan!');
-                        }, 300);
+
+                        // Tutup modal dulu
+                        closeModal(modalId);
+
+                        // Tampilkan notifikasi HANYA sekali
+                        showNotif('Pengaturan berhasil disimpan! Silakan refresh halaman Quran.');
+                    } else {
+                        showNotif('Gagal menyimpan pengaturan.', 'error');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotif('Terjadi kesalahan. Silakan coba lagi.', 'error');
                 });
         }
 
@@ -419,6 +432,8 @@
         }
 
         function saveFontSize() {
+            clearNotification();
+
             fetch('/pengaturan/font-size', {
                     method: 'POST',
                     headers: {
@@ -438,7 +453,12 @@
                         if (labelEl) labelEl.textContent = data.value;
                         closeModal('modal-font');
                         showNotif('Ukuran font berhasil disimpan!');
+                    } else {
+                        showNotif('Gagal menyimpan ukuran font.', 'error');
                     }
+                })
+                .catch(() => {
+                    showNotif('Terjadi kesalahan.', 'error');
                 });
         }
 
@@ -482,18 +502,38 @@
             openModal('modal-popup');
         }
 
-        function showNotif(message) {
+        // Fungsi untuk clear notifikasi lama
+        function clearNotification() {
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
+            }
             document.querySelectorAll('.toast-notification').forEach(el => el.remove());
+        }
+
+        // Fungsi show notifikasi yang lebih baik
+        function showNotif(message, type = 'success') {
+            // Hapus semua notifikasi yang ada
+            clearNotification();
+
             const notif = document.createElement('div');
-            notif.className =
-                'toast-notification fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 opacity-0 -translate-y-4';
+            notif.className = 'toast-notification fixed top-20 left-1/2 -translate-x-1/2 z-[100] ' +
+                (type === 'error' ? 'bg-red-500' : 'bg-emerald-500') +
+                ' text-white px-6 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 opacity-0 -translate-y-4';
             notif.textContent = message;
             document.body.appendChild(notif);
-            requestAnimationFrame(() => notif.classList.remove('opacity-0', '-translate-y-4'));
-            setTimeout(() => {
+
+            // Animasi masuk
+            requestAnimationFrame(() => {
+                notif.classList.remove('opacity-0', '-translate-y-4');
+            });
+
+            // Auto hide setelah 3 detik
+            notificationTimeout = setTimeout(() => {
                 notif.classList.add('opacity-0', '-translate-y-4');
                 setTimeout(() => notif.remove(), 300);
-            }, 2500);
+                notificationTimeout = null;
+            }, 3000);
         }
 
         document.addEventListener('keydown', function(e) {
