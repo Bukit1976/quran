@@ -19,7 +19,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#10b981">
     <title>@yield('title', 'HafalQuran')</title>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HafalQuran">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="manifest" href="/manifest.json">
 
+    <!-- Icon untuk berbagai device -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png">
     <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
@@ -242,6 +252,76 @@
             <span class="font-medium">{{ session('success') }}</span>
         </div>
     @endif
+    <!-- Script Firebase untuk Notifikasi -->
+    <script type="module">
+        // 1. Import fungsi yang dibutuhkan langsung dari CDN Firebase
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getMessaging,
+            getToken,
+            onMessage
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
+        // 2. Konfigurasi Firebase (Sesuai punya Bapak)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs0Ma5FvLJKWi-fcW2JV2_XcneBc7DVtQ",
+            authDomain: "hafalan-alquran.firebaseapp.com",
+            projectId: "hafalan-alquran",
+            storageBucket: "hafalan-alquran.firebasestorage.app",
+            messagingSenderId: "508902061866",
+            appId: "1:508902061866:web:80932deab28134d73c9053",
+            measurementId: "G-F6VZ2YRSH0"
+        };
+
+        // 3. Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        // 4. Fungsi untuk meminta izin notifikasi & mengambil Token
+        async function requestNotificationPermission() {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                console.log('Izin notifikasi diberikan!');
+
+                // PENTING: Ganti string di bawah ini dengan VAPID Key dari Firebase Console
+                const vapidKey =
+                    "BEHv79407C1fr2NjZC7Q3Hzpxssum8bPZyn0ec2RCw4CZ7QSIETvz3pahYSRyYENTMuvf6zJmWQjdGHdbtpVchI";
+
+                const token = await getToken(messaging, {
+                    vapidKey: vapidKey
+                });
+                console.log('FCM Token User:', token);
+
+                // Kirim token ini ke Laravel untuk disimpan di database
+                await fetch('/save-fcm-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        token: token
+                    })
+                });
+
+                alert("Notifikasi berhasil diaktifkan!");
+            } else {
+                console.log('Izin notifikasi ditolak user.');
+            }
+        }
+
+        // 5. Tangani pesan saat website sedang dibuka (foreground)
+        onMessage(messaging, (payload) => {
+            console.log('Pesan diterima: ', payload);
+            // Nanti bisa diganti dengan tampilan Toast Alpine.js yang lebih cantik
+            alert(payload.notification.title + ': ' + payload.notification.body);
+        });
+
+        // Membuat fungsi tersedia secara global agar bisa dipanggil dari tombol HTML
+        window.requestNotificationPermission = requestNotificationPermission;
+    </script>
     @stack('scripts')
 </body>
 

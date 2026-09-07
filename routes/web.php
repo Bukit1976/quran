@@ -14,6 +14,7 @@ use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\JuzController;
 use App\Http\Controllers\AlarmController;
+use App\Http\Controllers\NotificationController;
 
 // ==========================================
 // Route Utama (Redirect berdasarkan status login)
@@ -106,6 +107,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/alarm', [App\Http\Controllers\AlarmController::class, 'storeOrUpdate'])->name('alarm.store');
     Route::delete('/alarm/{alarm}', [App\Http\Controllers\AlarmController::class, 'destroy'])->name('alarm.destroy');
     Route::post('/alarm/{alarm}/toggle', [App\Http\Controllers\AlarmController::class, 'toggle'])->name('alarm.toggle');
+
+    Route::post('/save-fcm-token', [NotificationController::class, 'saveToken'])
+        ->middleware('auth');
 
     // Halaman Tambahan
     Route::get('/audio-manager', function () {
