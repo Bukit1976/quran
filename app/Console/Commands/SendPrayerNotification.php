@@ -47,11 +47,22 @@ class SendPrayerNotification extends Command
             'Content-Type' => 'application/json',
         ])->post('https://fcm.googleapis.com/fcm/send', [
             'to' => $token,
+            'priority' => 'high', // PENTING: Memaksa HP untuk segera memproses notifikasi
+            'time_to_live' => 60, // Notifikasi hangus jika HP tidak online dalam 60 detik
             'notification' => [
-                'title' => 'Waktu Sholat ' . $prayer['name'],
-                'body' => 'Saatnya menunaikan sholat ' . $prayer['name'],
-                'sound' => 'default',
-                'click_action' => url('/jadwal-sholat')
+                'title' => '🔔 Waktu Sholat ' . $prayer['name'],
+                'body' => 'Ayolah, saatnya menunaikan sholat ' . $prayer['name'],
+                'sound' => 'alarm.mp3', // Nama file suara (untuk Android native)
+                'click_action' => url('/jadwal-sholat'),
+                'icon' => url('/Logo/LogoNew.png')
+            ],
+            // Payload tambahan untuk memastikan HP bangun dari standby
+            'android' => [
+                'priority' => 'high',
+                'notification' => [
+                    'sound' => 'alarm.mp3',
+                    'default_vibrate_timings' => true
+                ]
             ]
         ]);
     }

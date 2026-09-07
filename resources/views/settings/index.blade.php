@@ -247,6 +247,46 @@
                 </div>
             </div>
 
+            {{-- ==================== NOTIFIKASI & ALARM (BARU) ==================== --}}
+            <div>
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    Notifikasi & Alarm</h2>
+                <div
+                    class="divide-y divide-gray-200 overflow-hidden rounded-2xl bg-white shadow-sm transition-colors duration-300 dark:divide-gray-800/50 dark:bg-gray-900 dark:shadow-none">
+                    <div class="px-4 py-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex-1">
+                                <p class="text-[15px] font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                    Notifikasi Jadwal Sholat
+                                </p>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Aktifkan agar mendapatkan pengingat waktu sholat meskipun aplikasi sedang ditutup atau
+                                    HP dalam mode standby.
+                                </p>
+                                <p id="notif-status"
+                                    class="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 hidden">
+                                    ✅ Notifikasi berhasil diaktifkan!
+                                </p>
+                            </div>
+                            <button onclick="activateNotifications()"
+                                class="flex-shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-md">
+                                <span>Aktifkan</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{-- ==================== AKHIR NOTIFIKASI & ALARM ==================== --}}
+
             {{-- LAINNYA --}}
             <div>
                 <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
@@ -302,7 +342,32 @@
         let currentFontSize = 18;
         const fontMin = 12,
             fontMax = 48;
-        let notificationTimeout = null; // Untuk mencegah notifikasi bertumpuk
+        let notificationTimeout = null;
+
+        // ==========================================
+        // FUNGSI BARU: Aktifkan Notifikasi FCM
+        // ==========================================
+        function activateNotifications() {
+            // Cek apakah fungsi dari Firebase di app.blade.php sudah dimuat
+            if (typeof window.requestNotificationPermission === 'function') {
+                // Panggil fungsi Firebase untuk minta izin dan simpan token
+                window.requestNotificationPermission().then(() => {
+                    // Tampilkan status di UI
+                    const statusEl = document.getElementById('notif-status');
+                    if (statusEl) {
+                        statusEl.classList.remove('hidden');
+                    }
+                    showNotif('✅ Notifikasi Jadwal Sholat berhasil diaktifkan!');
+                }).catch(err => {
+                    console.error(err);
+                    showNotif('Gagal mengaktifkan notifikasi. Pastikan Anda mengizinkan notifikasi browser.',
+                        'error');
+                });
+            } else {
+                showNotif('Fitur notifikasi belum dimuat. Silakan refresh halaman.', 'error');
+            }
+        }
+        // ==========================================
 
         document.addEventListener('DOMContentLoaded', () => {
             // Toggle settings
@@ -373,7 +438,6 @@
                 });
             }
 
-            // Hapus notifikasi lama jika ada
             clearNotification();
 
             fetch('/pengaturan/select', {
@@ -393,11 +457,7 @@
                     if (data.success) {
                         const labelElement = document.getElementById(labelId);
                         if (labelElement) labelElement.textContent = data.label || label;
-
-                        // Tutup modal dulu
                         closeModal(modalId);
-
-                        // Tampilkan notifikasi HANYA sekali
                         showNotif('Pengaturan berhasil disimpan! Silakan refresh halaman Quran.');
                     } else {
                         showNotif('Gagal menyimpan pengaturan.', 'error');
@@ -502,7 +562,6 @@
             openModal('modal-popup');
         }
 
-        // Fungsi untuk clear notifikasi lama
         function clearNotification() {
             if (notificationTimeout) {
                 clearTimeout(notificationTimeout);
@@ -511,9 +570,7 @@
             document.querySelectorAll('.toast-notification').forEach(el => el.remove());
         }
 
-        // Fungsi show notifikasi yang lebih baik
         function showNotif(message, type = 'success') {
-            // Hapus semua notifikasi yang ada
             clearNotification();
 
             const notif = document.createElement('div');
@@ -523,12 +580,10 @@
             notif.textContent = message;
             document.body.appendChild(notif);
 
-            // Animasi masuk
             requestAnimationFrame(() => {
                 notif.classList.remove('opacity-0', '-translate-y-4');
             });
 
-            // Auto hide setelah 3 detik
             notificationTimeout = setTimeout(() => {
                 notif.classList.add('opacity-0', '-translate-y-4');
                 setTimeout(() => notif.remove(), 300);

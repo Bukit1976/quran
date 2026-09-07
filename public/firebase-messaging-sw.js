@@ -14,15 +14,18 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
 messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
         icon: '/Logo/LogoNew.png',
         badge: '/Logo/LogoNew.png',
-        requireInteraction: true,
-        tag: 'prayer-time'
+        vibrate: [200, 100, 200, 100, 200, 100, 400], // Pola getar seperti alarm
+        requireInteraction: true, // Notifikasi tidak hilang sampai diklik
+        tag: 'prayer-alarm', // Mencegah notifikasi menumpuk
+        actions: [
+            { action: 'open', title: 'Buka Aplikasi' }
+        ]
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
