@@ -19,12 +19,20 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#10b981">
     <title>@yield('title', 'HafalQuran')</title>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Custom Config untuk Tailwind -->
+    <!-- Custom Config untuk Tailwind (PERBAIKAN DI SINI) -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // <--- INI KUNCINYA PAK! Agar tombol dark mode berfungsi
             theme: {
                 extend: {
                     colors: {
@@ -35,10 +43,10 @@
             }
         }
     </script>
+
     {{-- Apply User Settings --}}
     @if (isset($userSettings))
         <style>
-            /* Font Sizes */
             .quran-text {
                 font-size: {{ $userSettings->ukuran_font_arabic ?? 18 }}px !important;
             }
@@ -53,15 +61,12 @@
                 display: {{ $userSettings->aktifkan_terjemahan ? 'block' : 'none' }} !important;
             }
 
-            /* Tajwid Colors */
             @if (!$userSettings->tajwid_berwarna)
                 .quran-word {
                     color: inherit !important;
                     text-shadow: none !important;
                 }
             @endif
-
-            /* Theme */
             @if ($userSettings->tema_aplikasi === 'gelap')
                 html {
                     filter: invert(1) hue-rotate(180deg);
@@ -79,11 +84,10 @@
             @endif
         </style>
     @endif
-    <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Alpine.js (Pindahkan ke head agar x-data di <html> terbaca dengan baik) -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         [x-cloak] {
             display: none !important;
@@ -148,8 +152,9 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
+                        <!-- Tombol Dark Mode -->
                         <button @click="toggleDarkMode()"
-                            class="rounded-xl bg-gray-100 p-2.5 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700">
+                            class="rounded-xl bg-gray-100 p-2.5 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors">
                             <svg x-show="!darkMode" class="h-5 w-5" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -161,15 +166,17 @@
                                     d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                         </button>
+
+                        <!-- Dropdown User -->
                         <div x-data="{ dropdownOpen: false }" class="relative" @click.away="dropdownOpen = false">
                             <button @click="dropdownOpen = !dropdownOpen"
-                                class="flex items-center space-x-2 rounded-xl p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800">
+                                class="flex items-center space-x-2 rounded-xl p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                                 <div
                                     class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 font-semibold text-white">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
                                 </div>
                                 <span
-                                    class="hidden text-sm font-medium text-gray-700 dark:text-gray-300 lg:block">{{ Auth::user()->name }}</span>
+                                    class="hidden text-sm font-medium text-gray-700 dark:text-gray-300 lg:block">{{ Auth::user()->name ?? 'User' }}</span>
                             </button>
                             <div x-show="dropdownOpen" x-cloak
                                 class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
@@ -186,6 +193,8 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Mobile Menu -->
                 <div x-show="mobileMenuOpen" x-cloak
                     class="border-t border-gray-200 py-4 dark:border-gray-700 md:hidden">
                     <div class="flex flex-col space-y-1">
@@ -215,6 +224,7 @@
             </div>
         </main>
 
+        <!-- Footer -->
         <footer class="mt-auto border-t border-gray-200 bg-white py-8 dark:border-gray-800 dark:bg-gray-900">
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <p class="text-sm text-gray-500 dark:text-gray-400">&copy; {{ date('Y') }} HafalQuran</p>
@@ -222,6 +232,7 @@
         </footer>
     </div>
 
+    <!-- Toast Notification -->
     @if (session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
             class="fixed bottom-6 right-6 z-50 flex items-center space-x-3 rounded-xl bg-emerald-600 px-5 py-3 text-white shadow-2xl">
@@ -234,4 +245,4 @@
     @stack('scripts')
 </body>
 
-</html>
+</html
