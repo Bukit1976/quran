@@ -1,0 +1,12 @@
+{
+    "appId": "com.bukityetti.hafalquran",
+    "appName": "HafalQuran",
+    "webDir": "public",
+    "server": {
+        "url": "https://alquran.bukityetti.com",
+        "cleartext": false
+    },
+    "android": {
+        "allowMixedContent": true
+    }
+}

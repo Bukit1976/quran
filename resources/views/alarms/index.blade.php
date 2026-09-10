@@ -39,14 +39,14 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-amber-900 dark:text-amber-100">Aktifkan Suara Alarm</h3>
-                                <p class="text-sm text-amber-700 dark:text-amber-300">Browser memblokir suara otomatis. Klik
-                                    tombol ini dulu!</p>
+                                <h3 class="font-semibold text-amber-900 dark:text-amber-100">Aktifkan Notifikasi Alarm</h3>
+                                <p class="text-sm text-amber-700 dark:text-amber-300">Izinkan notifikasi agar alarm bisa
+                                    bunyi meski layar mati!</p>
                             </div>
                         </div>
-                        <button @click="unlockAudio()"
+                        <button @click="enableNotifications()"
                             class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-xl transition-all active:scale-95 w-full sm:w-auto">
-                            Klik untuk Aktifkan Suara
+                            Aktifkan Sekarang
                         </button>
                     </div>
                 </div>
@@ -323,6 +323,7 @@
 @push('scripts')
     <script>
         let currentAudioElement = null;
+        let scheduledNotifications = [];
 
         function alarmManager(initialAlarms) {
             return {
@@ -345,14 +346,94 @@
                 audioElement: null,
                 currentAlarmId: null,
 
-                init() {
+                async init() {
                     this.audioElement = document.getElementById('alarmAudio');
                     currentAudioElement = this.audioElement;
                     if (this.audioElement) {
                         this.audioElement.preload = 'auto';
                         this.audioElement.volume = 0.01;
                     }
+
+                    // Request notification permissions
+                    await this.requestPermissions();
+
+                    // Schedule all active alarms
+                    await this.scheduleAllAlarms();
+
                     this.startChecking();
+                },
+
+                async requestPermissions() {
+                    try {
+                        const {
+                            LocalNotifications
+                        } = await import('@capacitor/local-notifications');
+                        const permissions = await LocalNotifications.requestPermissions();
+                        console.log('Notification permissions:', permissions);
+                    } catch (error) {
+                        console.error('Failed to request permissions:', error);
+                    }
+                },
+
+                async enableNotifications() {
+                    await this.requestPermissions();
+                    this.audioUnlocked = true;
+                    localStorage.setItem('alarm_audio_unlocked', 'true');
+                    await this.scheduleAllAlarms();
+                    this.showToast('✅ Notifikasi alarm berhasil diaktifkan!');
+                },
+
+                async scheduleAllAlarms() {
+                    const {
+                        LocalNotifications
+                    } = await import('@capacitor/local-notifications');
+
+                    // Cancel all existing notifications
+                    await LocalNotifications.cancelAll();
+
+                    // Schedule new notifications for all active alarms
+                    const notifications = [];
+                    const now = new Date();
+
+                    for (const alarm of this.alarmsList) {
+                        if (!alarm.is_active) continue;
+
+                        const [hours, minutes] = alarm.time.split(':').map(Number);
+
+                        let scheduleTime = new Date();
+                        scheduleTime.setHours(hours, minutes, 0, 0);
+
+                        // If time has passed today, schedule for tomorrow
+                        if (scheduleTime <= now) {
+                            scheduleTime.setDate(scheduleTime.getDate() + 1);
+                        }
+
+                        notifications.push({
+                            title: '⏰ ' + (alarm.label || 'Alarm'),
+                            body: 'Waktunya ' + (alarm.label || 'alarm') + '!',
+                            id: alarm.id,
+                            schedule: {
+                                at: scheduleTime,
+                                repeats: false
+                            },
+                            sound: alarm.audio_path ? alarm.audio_path : undefined,
+                            actionTypeId: 'alarm',
+                            extra: {
+                                alarmId: alarm.id,
+                                label: alarm.label,
+                                time: alarm.time,
+                                audioPath: alarm.audio_path
+                            }
+                        });
+                    }
+
+                    if (notifications.length > 0) {
+                        await LocalNotifications.schedule({
+                            notifications: notifications
+                        });
+                        console.log('Scheduled notifications:', notifications);
+                        this.showToast(`✅ ${notifications.length} alarm dijadwalkan`);
+                    }
                 },
 
                 formatTime(time) {
@@ -435,7 +516,7 @@
                         this.audioElement.volume = 1.0;
                         this.audioElement.loop = false;
                         await this.audioElement.play();
-                        this.showToast(' Audio sedang diputar...');
+                        this.showToast('🔊 Audio sedang diputar...');
                         setTimeout(() => {
                             this.audioElement.pause();
                             this.audioElement.currentTime = 0;
@@ -462,6 +543,8 @@
                             })
                         });
                         if (response.ok) {
+                            // Reschedule all alarms
+                            await this.scheduleAllAlarms();
                             this.showToast(alarm.is_active ? '✅ Alarm diaktifkan' : '⏸️ Alarm dinonaktifkan');
                         } else {
                             alarm.is_active = !alarm.is_active;
@@ -561,8 +644,8 @@
         }
 
         /* ============================================
-       ALARM MODAL - KEREN & PROFESIONAL
-       ============================================ */
+               ALARM MODAL - KEREN & PROFESIONAL
+               ============================================ */
 
         /* Animated Particles Background */
         .particle {
