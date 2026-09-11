@@ -15,6 +15,7 @@ use App\Http\Controllers\AiController;
 use App\Http\Controllers\JuzController;
 use App\Http\Controllers\AlarmController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TranslateController;
 
 // ==========================================
 // Route Utama (Redirect berdasarkan status login)
@@ -119,6 +120,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/privacy', function () {
         return view('privacy');
     })->name('privacy');
+
+    Route::get('/translate', [TranslateController::class, 'index'])->name('translate.index');
+    Route::post('/translate/process', [TranslateController::class, 'process'])->name('translate.process');
 });
 
 // Include route bawaan Laravel untuk autentikasi (Login, Register, Lupa Password)

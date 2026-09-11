@@ -16,6 +16,10 @@ const config: CapacitorConfig = {
         LocalNotifications: {
             smallIcon: 'ic_notification',
             iconColor: '#10b981'
+        },
+        // TAMBAHAN: Konfigurasi Geolocation untuk Android
+        Geolocation: {
+            androidProvider: 'auto' // Menggunakan provider lokasi terbaik yang tersedia (Google Play Services atau fallback)
         }
     }
 };

@@ -150,6 +150,7 @@
                                     ['route' => 'doa.index', 'label' => 'Doa'],
                                     ['route' => 'tes.index', 'label' => 'Tes'],
                                     ['route' => 'statistik.index', 'label' => 'Statistik'],
+                                    ['route' => 'translate.index', 'label' => 'Translate AI'],
                                     ['route' => 'ai.index', 'label' => 'AI'],
                                 ];
                             @endphp
@@ -164,7 +165,7 @@
                     <div class="flex items-center space-x-2">
                         <!-- Tombol Dark Mode -->
                         <button @click="toggleDarkMode()"
-                            class="rounded-xl bg-gray-100 p-2.5 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors">
+                            class="rounded-xl bg-gray-100 p-2.5 text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700">
                             <svg x-show="!darkMode" class="h-5 w-5" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -180,7 +181,7 @@
                         <!-- Dropdown User -->
                         <div x-data="{ dropdownOpen: false }" class="relative" @click.away="dropdownOpen = false">
                             <button @click="dropdownOpen = !dropdownOpen"
-                                class="flex items-center space-x-2 rounded-xl p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                class="flex items-center space-x-2 rounded-xl p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
                                 <div
                                     class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 font-semibold text-white">
                                     {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
