@@ -8,7 +8,7 @@
             Jadwal Sholat Hari Ini
         </h2>
         <p class="text-sm text-gray-600 dark:text-gray-400">
-            Jadwal sholat akurat berdasarkan lokasi yang dipilih
+            Jadwal sholat otomatis berdasarkan lokasi Anda
         </p>
     </div>
 @endsection
@@ -16,9 +16,7 @@
 @section('content')
     <div x-data="jadwalSholat()" x-init="init()" class="mx-auto max-w-6xl space-y-6 px-4 md:px-0">
 
-        {{-- =========================================================
-             PANEL PEMILIHAN LOKASI - 3 LEVEL OTOMATIS
-        ========================================================== --}}
+        {{-- PANEL LOKASI GPS OTOMATIS --}}
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800">
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center gap-3">
@@ -32,59 +30,50 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Lokasi Jadwal Sholat</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Pilih Provinsi, Kota, dan Kecamatan</p>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Lokasi Anda</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" x-text="locationStatus"></p>
                     </div>
                 </div>
 
-                {{-- Dropdown Area: Responsif penuh untuk HP, rapi untuk Tablet/Desktop --}}
-                <div class="flex flex-col gap-3 sm:flex-row w-full md:w-auto">
-                    <!-- Provinsi -->
-                    <select x-model="selectedProvinsi" @change="onProvinsiChange()"
-                        class="w-full md:w-48 rounded-xl border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                        <option value="">-- Provinsi --</option>
-                        <template x-for="prov in provinsiList" :key="prov.id">
-                            <option :value="prov.id" x-text="prov.nama"></option>
-                        </template>
-                    </select>
-
-                    <!-- Kota/Kabupaten -->
-                    <select x-model="selectedKota" @change="onKotaChange()" :disabled="!selectedProvinsi"
-                        class="w-full md:w-48 rounded-xl border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:disabled:bg-gray-800">
-                        <option value="">-- Kota --</option>
-                        <template x-for="kota in kotaList" :key="kota">
-                            <option :value="kota" x-text="kota"></option>
-                        </template>
-                    </select>
-
-                    <!-- Kecamatan -->
-                    <select x-model="selectedKecamatan" @change="onKecamatanChange()" :disabled="!selectedKota"
-                        class="w-full md:w-48 rounded-xl border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:disabled:bg-gray-800">
-                        <option value="">-- Kecamatan --</option>
-                        <template x-for="kec in kecamatanList" :key="kec">
-                            <option :value="kec" x-text="kec"></option>
-                        </template>
-                    </select>
-                </div>
+                {{-- Tombol Refresh GPS --}}
+                <button @click="detectLocationGPS()" :disabled="detectingGPS"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-cyan-600">
+                    <svg x-show="!detectingGPS" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <svg x-show="detectingGPS" class="h-5 w-5 animate-spin" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span x-text="detectingGPS ? 'Mendeteksi...' : 'Perbarui Lokasi'"></span>
+                </button>
             </div>
 
+            {{-- INFO LOKASI --}}
             <div
                 class="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
                 <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Jadwal sholat untuk: <strong x-text="kota || 'Belum dipilih'" class="break-words"></strong></span>
+                <div class="flex-1">
+                    <span class="font-semibold">Lokasi: </span>
+                    <span x-text="displayLocation" class="break-words"></span>
+                    <span x-show="gpsSuccess"
+                        class="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        GPS
+                    </span>
+                </div>
             </div>
         </div>
 
-        {{-- =========================================================
-             AUDIO ADZAN
-        ========================================================== --}}
         <audio id="audioAdzan" preload="auto" x-ref="audioAdzan"></audio>
 
-        {{-- =========================================================
-             PANEL KONTROL ADZAN
-        ========================================================== --}}
+        {{-- PANEL KONTROL ADZAN --}}
         <div
             class="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-5 shadow-lg dark:border-emerald-800 dark:from-emerald-900/30 dark:via-teal-900/30 dark:to-cyan-900/30">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -105,13 +94,13 @@
                 <div class="flex flex-col gap-3 sm:flex-row">
                     <select x-model="selectedAdzan" @change="gantiAdzan()"
                         class="w-full sm:min-w-[250px] rounded-xl border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                        <optgroup label="🕌 Timur Tengah">
+                        <optgroup label="Timur Tengah">
                             <option value="masjidil_haram">Masjidil Haram (Mekkah)</option>
                             <option value="mishary_alafasy">Mishary Rashid Alafasy</option>
                             <option value="abdul_basit">Abdul Basit (Mesir)</option>
                             <option value="saudi_1">Adzan Saudi (Madani)</option>
                         </optgroup>
-                        <optgroup label="🌏 Asia">
+                        <optgroup label="Asia">
                             <option value="turki_1">Turki (Sultan Ahmed)</option>
                             <option value="malaysia_1">Malaysia</option>
                             <option value="indonesia_1">Indonesia</option>
@@ -136,9 +125,7 @@
             </div>
         </div>
 
-        {{-- =========================================================
-             COUNTDOWN
-        ========================================================== --}}
+        {{-- COUNTDOWN --}}
         <div
             class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-6 md:p-8 text-white shadow-2xl">
             <div class="relative z-10">
@@ -162,7 +149,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span x-text="kota" class="break-words"></span>
+                    <span x-text="displayLocation" class="break-words"></span>
                 </div>
                 <div class="mt-2 text-sm text-emerald-100">
                     <span x-text="tanggalHijriah"></span>
@@ -172,18 +159,13 @@
             </div>
         </div>
 
-        {{-- =========================================================
-             LOADING
-        ========================================================== --}}
+        {{-- LOADING --}}
         <div x-show="loading" class="flex justify-center py-12">
             <div class="h-16 w-16 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600"></div>
         </div>
 
-        {{-- =========================================================
-             JADWAL SHOLAT
-        ========================================================== --}}
+        {{-- JADWAL SHOLAT --}}
         <div x-show="!loading" x-cloak class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-
             {{-- SUBUH --}}
             <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer"
                 :class="{ 'scale-110': isNextPrayer('Fajr') }">
@@ -252,12 +234,9 @@
                 <span x-show="isNextPrayer('Isha')"
                     class="mt-3 inline-block rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white animate-pulse shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
             </div>
-
         </div>
 
-        {{-- =========================================================
-             INFO
-        ========================================================== --}}
+        {{-- INFO --}}
         <div
             class="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-lg dark:border-amber-800 dark:from-amber-900/20 dark:to-orange-900/20">
             <div class="flex items-start gap-4">
@@ -268,21 +247,18 @@
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h4 class="mb-2 text-sm font-bold text-amber-900 dark:text-amber-100">💡 Tips Penggunaan</h4>
+                    <h4 class="mb-2 text-sm font-bold text-amber-900 dark:text-amber-100"> Tips Penggunaan</h4>
                     <ul class="space-y-1 text-sm text-amber-800 dark:text-amber-200">
-                        <li>• Pilih <strong>Provinsi → Kota → Kecamatan</strong> untuk akurasi terbaik.</li>
-                        <li>• Data kecamatan tersedia untuk kota-kota besar di database.</li>
-                        <li>• Jika data kecamatan belum tersedia, sistem otomatis menggunakan nama
-                            <strong>Kota/Kabupaten</strong> yang Anda pilih.</li>
-                        <li>• Lokasi & pilihan suara adzan tersimpan otomatis di browser Anda.</li>
+                        <li>• Lokasi dideteksi <strong>otomatis</strong> saat halaman dibuka.</li>
+                        <li>• Klik tombol <strong>"Perbarui Lokasi"</strong> jika ingin refresh GPS.</li>
+                        <li>• Pastikan <strong>GPS/Location</strong> aktif di perangkat Anda.</li>
+                        <li>• Izinkan akses lokasi saat diminta browser/aplikasi.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        {{-- =========================================================
-             TOAST
-        ========================================================== --}}
+        {{-- TOAST --}}
         <div x-show="showToast" x-transition x-cloak
             class="fixed bottom-6 right-6 left-6 md:left-auto z-50 rounded-xl bg-emerald-600 px-6 py-4 text-white shadow-2xl">
             <div class="flex items-center gap-3">
@@ -299,263 +275,13 @@
 
 @push('scripts')
     <script>
+        const LocalNotif = (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window
+                .Capacitor.Plugins.LocalNotifications) ?
+            window.Capacitor.Plugins.LocalNotifications :
+            null;
+
         function jadwalSholat() {
             return {
-                /* =====================================================
-                    DATA PROVINSI + KABUPATEN/KOTA + KECAMATAN (EMBED)
-                ===================================================== */
-                provinsiList: [{
-                        id: 'dki',
-                        nama: 'DKI Jakarta',
-                        kota: ['Jakarta Pusat', 'Jakarta Utara', 'Jakarta Barat', 'Jakarta Selatan', 'Jakarta Timur',
-                            'Kepulauan Seribu'
-                        ]
-                    },
-                    {
-                        id: 'jabar',
-                        nama: 'Jawa Barat',
-                        kota: ['Bandung', 'Bekasi', 'Bogor', 'Cimahi', 'Cirebon', 'Depok', 'Sukabumi', 'Tasikmalaya',
-                            'Banjar', 'Bandung Barat', 'Garut', 'Indramayu', 'Karawang', 'Kuningan', 'Majalengka',
-                            'Pangandaran', 'Purwakarta', 'Subang', 'Sumedang', 'Ciamis'
-                        ]
-                    },
-                    {
-                        id: 'jateng',
-                        nama: 'Jawa Tengah',
-                        kota: ['Semarang', 'Surakarta', 'Magelang', 'Pekalongan', 'Salatiga', 'Tegal', 'Banyumas',
-                            'Batang', 'Blora', 'Boyolali', 'Brebes', 'Cilacap', 'Demak', 'Grobogan', 'Jepara',
-                            'Karanganyar', 'Kebumen', 'Kendal', 'Klaten', 'Kudus', 'Pati', 'Pemalang',
-                            'Purbalingga', 'Purworejo', 'Rembang', 'Sragen', 'Sukoharjo', 'Temanggung', 'Wonogiri',
-                            'Wonosobo'
-                        ]
-                    },
-                    {
-                        id: 'diy',
-                        nama: 'DI Yogyakarta',
-                        kota: ['Yogyakarta', 'Bantul', 'Gunung Kidul', 'Kulon Progo', 'Sleman']
-                    },
-                    {
-                        id: 'jatim',
-                        nama: 'Jawa Timur',
-                        kota: ['Surabaya', 'Malang', 'Sidoarjo', 'Gresik', 'Mojokerto', 'Pasuruan', 'Probolinggo',
-                            'Madiun', 'Kediri', 'Blitar', 'Batu', 'Bangkalan', 'Banyuwangi', 'Bojonegoro',
-                            'Bondowoso', 'Jember', 'Jombang', 'Lamongan', 'Lumajang', 'Magetan', 'Nganjuk', 'Ngawi',
-                            'Pacitan', 'Pamekasan', 'Ponorogo', 'Sampang', 'Situbondo', 'Sumenep', 'Trenggalek',
-                            'Tuban', 'Tulungagung'
-                        ]
-                    },
-                    {
-                        id: 'banten',
-                        nama: 'Banten',
-                        kota: ['Serang', 'Cilegon', 'Tangerang', 'Tangerang Selatan', 'Lebak', 'Pandeglang']
-                    },
-                    {
-                        id: 'sumut',
-                        nama: 'Sumatera Utara',
-                        kota: ['Medan', 'Binjai', 'Pematang Siantar', 'Tanjung Balai', 'Tebing Tinggi', 'Sibolga',
-                            'Padang Sidempuan', 'Gunungsitoli', 'Deli Serdang', 'Langkat', 'Karo', 'Simalungun',
-                            'Asahan', 'Labuhan Batu', 'Tapanuli Utara', 'Tapanuli Tengah', 'Tapanuli Selatan',
-                            'Mandailing Natal', 'Nias', 'Nias Selatan', 'Nias Utara', 'Nias Barat',
-                            'Humbang Hasundutan', 'Pakpak Bharat', 'Samosir', 'Serdang Bedagai', 'Batu Bara',
-                            'Padang Lawas', 'Padang Lawas Utara', 'Labuhan Batu Selatan', 'Labuhan Batu Utara'
-                        ]
-                    },
-                    {
-                        id: 'sumbar',
-                        nama: 'Sumatera Barat',
-                        kota: ['Padang', 'Bukittinggi', 'Padang Panjang', 'Payakumbuh', 'Sawahlunto', 'Solok',
-                            'Pariaman', 'Agam', 'Dharmasraya', 'Kepulauan Mentawai', 'Lima Puluh Kota',
-                            'Padang Pariaman', 'Pasaman', 'Pasaman Barat', 'Pesisir Selatan', 'Sijunjung',
-                            'Solok Selatan', 'Tanah Datar'
-                        ]
-                    },
-                    {
-                        id: 'riau',
-                        nama: 'Riau',
-                        kota: ['Pekanbaru', 'Dumai', 'Bengkalis', 'Indragiri Hilir', 'Indragiri Hulu', 'Kampar',
-                            'Kepulauan Meranti', 'Kuantan Singingi', 'Pelalawan', 'Rokan Hilir', 'Rokan Hulu',
-                            'Siak'
-                        ]
-                    },
-                    {
-                        id: 'sumsel',
-                        nama: 'Sumatera Selatan',
-                        kota: ['Palembang', 'Lubuklinggau', 'Pagar Alam', 'Prabumulih', 'Banyuasin', 'Empat Lawang',
-                            'Lahat', 'Muara Enim', 'Musi Banyuasin', 'Musi Rawas', 'Musi Rawas Utara', 'Ogan Ilir',
-                            'Ogan Komering Ilir', 'Ogan Komering Ulu', 'Ogan Komering Ulu Selatan',
-                            'Ogan Komering Ulu Timur', 'Penukal Abab Lematang Ilir'
-                        ]
-                    },
-                    {
-                        id: 'lampung',
-                        nama: 'Lampung',
-                        kota: ['Bandar Lampung', 'Metro', 'Lampung Barat', 'Lampung Selatan', 'Lampung Tengah',
-                            'Lampung Timur', 'Lampung Utara', 'Mesuji', 'Pesawaran', 'Pesisir Barat', 'Pringsewu',
-                            'Tanggamus', 'Tulang Bawang', 'Tulang Bawang Barat', 'Way Kanan'
-                        ]
-                    },
-                    {
-                        id: 'bali',
-                        nama: 'Bali',
-                        kota: ['Denpasar', 'Badung', 'Bangli', 'Buleleng', 'Gianyar', 'Jembrana', 'Karangasem',
-                            'Klungkung', 'Tabanan'
-                        ]
-                    },
-                    {
-                        id: 'ntb',
-                        nama: 'Nusa Tenggara Barat',
-                        kota: ['Mataram', 'Bima', 'Dompu', 'Lombok Barat', 'Lombok Tengah', 'Lombok Timur',
-                            'Lombok Utara', 'Sumbawa', 'Sumbawa Barat'
-                        ]
-                    },
-                    {
-                        id: 'kalbar',
-                        nama: 'Kalimantan Barat',
-                        kota: ['Pontianak', 'Singkawang', 'Bengkayang', 'Kapuas Hulu', 'Kayong Utara', 'Ketapang',
-                            'Kubu Raya', 'Landak', 'Melawi', 'Sambas', 'Sanggau', 'Sekadau', 'Sintang'
-                        ]
-                    },
-                    {
-                        id: 'kalsel',
-                        nama: 'Kalimantan Selatan',
-                        kota: ['Banjarmasin', 'Banjarbaru', 'Balangan', 'Banjar', 'Barito Kuala', 'Hulu Sungai Selatan',
-                            'Hulu Sungai Tengah', 'Hulu Sungai Utara', 'Kotabaru', 'Tabalong', 'Tanah Bumbu',
-                            'Tanah Laut', 'Tapin'
-                        ]
-                    },
-                    {
-                        id: 'kaltim',
-                        nama: 'Kalimantan Timur',
-                        kota: ['Samarinda', 'Balikpapan', 'Bontang', 'Berau', 'Kutai Barat', 'Kutai Kartanegara',
-                            'Kutai Timur', 'Mahakam Ulu', 'Paser', 'Penajam Paser Utara'
-                        ]
-                    },
-                    {
-                        id: 'sulsel',
-                        nama: 'Sulawesi Selatan',
-                        kota: ['Makassar', 'Palopo', 'Parepare', 'Bantaeng', 'Barru', 'Bone', 'Bulukumba', 'Enrekang',
-                            'Gowa', 'Jeneponto', 'Kepulauan Selayar', 'Luwu', 'Luwu Timur', 'Luwu Utara', 'Maros',
-                            'Pangkajene dan Kepulauan', 'Pinrang', 'Sidenreng Rappang', 'Sinjai', 'Soppeng',
-                            'Takalar', 'Tana Toraja', 'Toraja Utara', 'Wajo'
-                        ]
-                    },
-                    {
-                        id: 'sulut',
-                        nama: 'Sulawesi Utara',
-                        kota: ['Manado', 'Bitung', 'Kotamobagu', 'Tomohon', 'Bolaang Mongondow',
-                            'Bolaang Mongondow Selatan', 'Bolaang Mongondow Timur', 'Bolaang Mongondow Utara',
-                            'Kepulauan Sangihe', 'Kepulauan Siau Tagulandang Biaro', 'Kepulauan Talaud', 'Minahasa',
-                            'Minahasa Selatan', 'Minahasa Tenggara', 'Minahasa Utara'
-                        ]
-                    },
-                    {
-                        id: 'papua',
-                        nama: 'Papua',
-                        kota: ['Jayapura', 'Biak Numfor', 'Boven Digoel', 'Deiyai', 'Dogiyai', 'Intan Jaya',
-                            'Jayawijaya', 'Keerom', 'Kepulauan Yapen', 'Lanny Jaya', 'Mamberamo Raya',
-                            'Mamberamo Tengah', 'Mappi', 'Merauke', 'Mimika', 'Nabire', 'Nduga', 'Paniai',
-                            'Pegunungan Bintang', 'Puncak', 'Puncak Jaya', 'Sarmi', 'Supiori', 'Tolikara',
-                            'Waropen', 'Yahukimo', 'Yalimo'
-                        ]
-                    }
-                ],
-
-                dataKecamatan: {
-                    'Jakarta Pusat': ['Gambir', 'Tanah Abang', 'Menteng', 'Senen', 'Cempaka Putih', 'Johar Baru',
-                        'Kemayoran', 'Sawah Besar'
-                    ],
-                    'Jakarta Utara': ['Penjaringan', 'Pademangan', 'Tanjung Priok', 'Koja', 'Kelapa Gading', 'Cilincing'],
-                    'Jakarta Barat': ['Cengkareng', 'Grogol Petamburan', 'Taman Sari', 'Tambora', 'Kebon Jeruk',
-                        'Kalideres', 'Palmerah', 'Kembangan'
-                    ],
-                    'Jakarta Selatan': ['Jagakarsa', 'Pasar Minggu', 'Cilandak', 'Pesanggrahan', 'Kebayoran Lama',
-                        'Kebayoran Baru', 'Mampang Prapatan', 'Pancoran', 'Tebet', 'Setiabudi'
-                    ],
-                    'Jakarta Timur': ['Pasar Rebo', 'Ciracas', 'Cipayung', 'Makasar', 'Kramat Jati', 'Jatinegara',
-                        'Duren Sawit', 'Cakung', 'Pulo Gadung', 'Matraman'
-                    ],
-                    'Bandung': ['Andir', 'Astana Anyar', 'Antapani', 'Arcamanik', 'Babakan Ciparay', 'Bandung Kidul',
-                        'Bandung Kulon', 'Bandung Wetan', 'Batununggal', 'Bojongloa Kaler', 'Bojongloa Kidul',
-                        'Buahbatu', 'Cibeunying Kaler', 'Cibeunying Kidul', 'Cibiru', 'Cicendo', 'Cidadap', 'Cinambo',
-                        'Coblong', 'Gedebage', 'Kiaracondong', 'Lengkong', 'Mandalajati', 'Panyileukan', 'Rancasari',
-                        'Regol', 'Sukajadi', 'Sukasari', 'Sumur Bandung', 'Ujungberung'
-                    ],
-                    'Surabaya': ['Asemrowo', 'Benowo', 'Bubutan', 'Bulak', 'Dukuh Pakis', 'Gayungan', 'Genteng', 'Gubeng',
-                        'Gunung Anyar', 'Jambangan', 'Karang Pilang', 'Kenjeran', 'Krembangan', 'Lakarsantri',
-                        'Mulyorejo', 'Pabean Cantian', 'Pakal', 'Rungkut', 'Sambikerep', 'Sawahan', 'Semampir',
-                        'Simokerto', 'Sukolilo', 'Sukomanunggal', 'Tambaksari', 'Tandes', 'Tegalsari',
-                        'Tenggilis Mejoyo', 'Wiyung', 'Wonocolo', 'Wonokromo'
-                    ],
-                    'Semarang': ['Banyumanik', 'Candisari', 'Gajahmungkur', 'Gayamsari', 'Genuk', 'Gunungpati', 'Mijen',
-                        'Ngaliyan', 'Pedurungan', 'Semarang Barat', 'Semarang Selatan', 'Semarang Tengah',
-                        'Semarang Timur', 'Semarang Utara', 'Tembalang', 'Tugu'
-                    ],
-                    'Medan': ['Medan Amplas', 'Medan Area', 'Medan Barat', 'Medan Baru', 'Medan Belawan', 'Medan Deli',
-                        'Medan Denai', 'Medan Helvetia', 'Medan Johor', 'Medan Kota', 'Medan Labuhan', 'Medan Maimun',
-                        'Medan Marelan', 'Medan Polonia', 'Medan Selayang', 'Medan Sunggal', 'Medan Tembung',
-                        'Medan Tuntungan'
-                    ],
-                    'Makassar': ['Biringkanaya', 'Bontoala', 'Mamajang', 'Manggala', 'Mariso', 'Panakkukang', 'Rappocini',
-                        'Tamalate', 'Ujung Pandang', 'Ujung Tanah', 'Wajo'
-                    ],
-                    'Sidoarjo': ['Balongbendo', 'Buduran', 'Candi', 'Gedangan', 'Jabon', 'Krembung', 'Krian', 'Prambon',
-                        'Porong', 'Sedati', 'Sidoarjo', 'Taman', 'Tanggulangin', 'Tarik', 'Tulangan', 'Waru', 'Wonoayu'
-                    ],
-                    'Malang': ['Blimbing', 'Kedungkandang', 'Klojen', 'Lowokwaru', 'Sukun'],
-                    'Yogyakarta': ['Danurejan', 'Gedongtengen', 'Gondokusuman', 'Gondomanan', 'Jetis', 'Kotagede', 'Kraton',
-                        'Mantrijeron', 'Mergangsan', 'Ngampilan', 'Pakualaman', 'Tegalrejo', 'Umbulharjo', 'Wirobrajan'
-                    ],
-                    'Bogor': ['Bogor Barat', 'Bogor Selatan', 'Bogor Tengah', 'Bogor Timur', 'Bogor Utara', 'Tanah Sareal'],
-                    'Depok': ['Beji', 'Bojongsari', 'Cilodong', 'Cimanggis', 'Cinere', 'Cipayung', 'Limo', 'Pancoran Mas',
-                        'Sawangan', 'Sukmajaya', 'Tapos'
-                    ],
-                    'Bekasi': ['Bantar Gebang', 'Bekasi Barat', 'Bekasi Selatan', 'Bekasi Timur', 'Bekasi Utara',
-                        'Jatiasih', 'Jatisampurna', 'Medan Satria', 'Mustika Jaya', 'Pondok Gede', 'Pondok Melati',
-                        'Rawalumbu'
-                    ],
-                    'Tangerang': ['Batuceper', 'Benda', 'Cibodas', 'Ciledug', 'Karawaci', 'Larangan', 'Neglasari', 'Periuk',
-                        'Pinang', 'Tangerang'
-                    ],
-                    'Tangerang Selatan': ['Ciputat', 'Ciputat Timur', 'Pamulang', 'Pondok Aren', 'Serpong', 'Serpong Utara',
-                        'Setu'
-                    ],
-                    'Denpasar': ['Denpasar Barat', 'Denpasar Selatan', 'Denpasar Timur', 'Denpasar Utara'],
-                    'Palembang': ['Alang-Alang Lebar', 'Bukit Kecil', 'Gandus', 'Ilir Barat I', 'Ilir Barat II',
-                        'Ilir Timur I', 'Ilir Timur II', 'Ilir Timur III', 'Kalidoni', 'Kemuning', 'Kertapati', 'Plaju',
-                        'Sako', 'Seberang Ulu I', 'Seberang Ulu II', 'Sukarami'
-                    ],
-                    'Pekanbaru': ['Bukit Raya', 'Lima Puluh', 'Marpoyan Damai', 'Payung Sekaki', 'Pekanbaru Kota', 'Rumbai',
-                        'Rumbai Barat', 'Rumbai Timur', 'Sail', 'Senapelan', 'Sukajadi', 'Tampan', 'Tenayan Raya'
-                    ],
-                    'Banjarmasin': ['Banjarmasin Barat', 'Banjarmasin Selatan', 'Banjarmasin Tengah', 'Banjarmasin Timur',
-                        'Banjarmasin Utara'
-                    ],
-                    'Samarinda': ['Loa Janan Ilir', 'Palaran', 'Samarinda Ilir', 'Samarinda Kota', 'Samarinda Seberang',
-                        'Samarinda Ulu', 'Sungai Kunjang'
-                    ],
-                    'Balikpapan': ['Balikpapan Barat', 'Balikpapan Kota', 'Balikpapan Selatan', 'Balikpapan Tengah',
-                        'Balikpapan Timur', 'Balikpapan Utara'
-                    ],
-                    'Manado': ['Bunaken', 'Bunaken Kepulauan', 'Malalayang', 'Mapanget', 'Paal Dua', 'Sario', 'Singkil',
-                        'Tikala', 'Tuminting', 'Wanea', 'Wenang'
-                    ],
-                    'Pontianak': ['Pontianak Barat', 'Pontianak Kota', 'Pontianak Selatan', 'Pontianak Timur',
-                        'Pontianak Utara'
-                    ],
-                    'Padang': ['Bungus Teluk Kabung', 'Koto Tangah', 'Kuranji', 'Lubuk Begalung', 'Lubuk Kilangan',
-                        'Nanggalo', 'Padang Barat', 'Padang Selatan', 'Padang Timur', 'Padang Utara', 'Pauh',
-                        'Sei. Loloan'
-                    ]
-                },
-
-                selectedProvinsi: localStorage.getItem('sholat_provinsi') || '',
-                selectedKota: localStorage.getItem('sholat_kota_dropdown') || '',
-                selectedKecamatan: localStorage.getItem('sholat_kecamatan_dropdown') || '',
-                // manualKota DIHAPUS karena tidak lagi digunakan
-                kotaList: [],
-                kecamatanList: [],
-
-                kota: localStorage.getItem('sholat_kota') || 'Sidoarjo',
                 jadwalSholat: {
                     Fajr: '04:30',
                     Sunrise: '05:45',
@@ -578,6 +304,13 @@
                 countdownInterval: null,
                 toastTimeout: null,
 
+                detectingGPS: false,
+                gpsSuccess: false,
+                currentLat: null,
+                currentLng: null,
+                displayLocation: 'Mendeteksi lokasi...',
+                locationStatus: 'Mencari lokasi Anda...',
+
                 adzanSources: {
                     masjidil_haram: 'https://www.islamcan.com/audio/adhan/azan1.mp3',
                     mishary_alafasy: 'https://www.islamcan.com/audio/adhan/azan2.mp3',
@@ -589,26 +322,175 @@
                     pakistan_1: 'https://www.islamcan.com/audio/adhan/azan8.mp3'
                 },
 
-                /* ===================================================== INIT ===================================================== */
                 async init() {
                     this.updateAudioSource();
                     this.updateTanggal();
 
-                    // Restore state dari localStorage
-                    if (this.selectedProvinsi) {
-                        this.loadKotaList(this.selectedProvinsi);
-                        if (this.selectedKota) {
-                            this.loadKecamatanList(this.selectedKota);
-                            if (this.selectedKecamatan) {
-                                this.kota = `${this.selectedKecamatan} ${this.selectedKota}`;
-                            } else {
-                                this.kota = this.selectedKota;
-                            }
+                    if (LocalNotif) {
+                        try {
+                            await LocalNotif.createChannel({
+                                id: 'alarm_channel',
+                                name: 'Alarm Sholat',
+                                description: 'Notifikasi waktu sholat',
+                                importance: 4,
+                                visibility: 1,
+                                sound: 'default',
+                                vibration: true
+                            });
+                            await LocalNotif.requestPermissions();
+                        } catch (e) {
+                            console.log('Setup notifikasi:', e);
                         }
                     }
 
-                    await this.ambilJadwal();
+                    // Coba load koordinat dari localStorage dulu
+                    const savedLat = localStorage.getItem('sholat_lat');
+                    const savedLng = localStorage.getItem('sholat_lng');
+                    const savedLocation = localStorage.getItem('sholat_location_name');
+
+                    if (savedLat && savedLng) {
+                        this.currentLat = parseFloat(savedLat);
+                        this.currentLng = parseFloat(savedLng);
+                        if (savedLocation) {
+                            this.displayLocation = savedLocation;
+                            this.gpsSuccess = true;
+                            this.locationStatus = 'Lokasi tersimpan: ' + savedLocation;
+                        }
+                        await this.fetchPrayerTimesByGPS(this.currentLat, this.currentLng);
+                    } else {
+                        // Belum ada data GPS, deteksi otomatis
+                        await this.detectLocationGPS();
+                    }
+
                     this.startCountdown();
+                },
+
+                async detectLocationGPS() {
+                    if (!navigator.geolocation) {
+                        this.locationStatus = 'Browser tidak mendukung GPS';
+                        this.showToastMessage('Browser tidak mendukung GPS');
+                        return;
+                    }
+
+                    this.detectingGPS = true;
+                    this.locationStatus = 'Mencari lokasi Anda...';
+                    this.showToastMessage('Mendeteksi lokasi...');
+
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(
+                                (pos) => resolve(pos),
+                                (err) => reject(err), {
+                                    enableHighAccuracy: true,
+                                    timeout: 15000,
+                                    maximumAge: 0
+                                }
+                            );
+                        });
+
+                        this.currentLat = position.coords.latitude;
+                        this.currentLng = position.coords.longitude;
+
+                        await this.reverseGeocode(this.currentLat, this.currentLng);
+                        await this.fetchPrayerTimesByGPS(this.currentLat, this.currentLng);
+
+                        this.gpsSuccess = true;
+                        localStorage.setItem('sholat_gps', 'true');
+                        localStorage.setItem('sholat_lat', this.currentLat);
+                        localStorage.setItem('sholat_lng', this.currentLng);
+
+                        this.locationStatus = 'Lokasi terdeteksi: ' + this.displayLocation;
+                        this.showToastMessage('Lokasi berhasil dideteksi!');
+
+                    } catch (error) {
+                        console.error('GPS Error:', error);
+                        let errorMsg = 'Gagal mendeteksi lokasi. ';
+                        if (error.code === 1) errorMsg += 'Izin lokasi ditolak.';
+                        else if (error.code === 2) errorMsg += 'Posisi tidak tersedia.';
+                        else if (error.code === 3) errorMsg += 'Timeout. Coba lagi.';
+                        else errorMsg += 'Error tidak diketahui.';
+
+                        this.locationStatus = errorMsg;
+                        this.showToastMessage(errorMsg);
+
+                        // Fallback: pakai jadwal default
+                        this.displayLocation = 'Lokasi Default';
+                        this.loading = false;
+                    } finally {
+                        this.detectingGPS = false;
+                    }
+                },
+
+                async reverseGeocode(lat, lng) {
+                    try {
+                        const response = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' +
+                            lat + '&lon=' + lng + '&zoom=10&addressdetails=1', {
+                                headers: {
+                                    'Accept-Language': 'id'
+                                }
+                            });
+                        const data = await response.json();
+
+                        let locationName = '';
+                        const addr = data.address || {};
+
+                        if (addr.city_district || addr.suburb) {
+                            locationName = addr.city_district || addr.suburb;
+                        } else if (addr.city || addr.town || addr.village) {
+                            locationName = addr.city || addr.town || addr.village;
+                        }
+
+                        if (addr.county) {
+                            locationName += ', ' + addr.county;
+                        } else if (addr.state) {
+                            locationName += ', ' + addr.state;
+                        }
+
+                        if (locationName) {
+                            this.displayLocation = locationName;
+                            localStorage.setItem('sholat_location_name', locationName);
+                        } else {
+                            this.displayLocation = lat.toFixed(4) + ', ' + lng.toFixed(4);
+                        }
+                    } catch (error) {
+                        console.error('Reverse geocode error:', error);
+                        this.displayLocation = lat.toFixed(4) + ', ' + lng.toFixed(4);
+                    }
+                },
+
+                async fetchPrayerTimesByGPS(lat, lng) {
+                    this.loading = true;
+                    try {
+                        const tanggal = new Date();
+                        const year = tanggal.getFullYear();
+                        const month = String(tanggal.getMonth() + 1).padStart(2, '0');
+                        const day = String(tanggal.getDate()).padStart(2, '0');
+
+                        const url = 'https://api.aladhan.com/v1/timings/' + year + '-' + month + '-' + day +
+                            '?latitude=' + lat + '&longitude=' + lng + '&method=11&timezone=Asia/Jakarta';
+
+                        const response = await fetch(url);
+                        const data = await response.json();
+
+                        if (data.code === 200 && data.data && data.data.timings) {
+                            this.jadwalSholat = data.data.timings;
+                            if (data.data.date && data.data.date.hijri) {
+                                this.tanggalHijriah = data.data.date.hijri.day + ' ' + data.data.date.hijri.month.en +
+                                    ' ' + data.data.date.hijri.year + ' H';
+                            }
+                            if (data.data.date && data.data.date.readable) {
+                                this.tanggalMasehi = data.data.date.readable;
+                            }
+                            this.updateCountdown();
+                        } else {
+                            throw new Error('Format tidak dikenali');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.showToastMessage('Gagal mengambil jadwal: ' + error.message);
+                    } finally {
+                        this.loading = false;
+                    }
                 },
 
                 updateTanggal() {
@@ -626,131 +508,6 @@
                     }) + ' H';
                 },
 
-                /* ===================================================== LOGIKA WILAYAH 3 LEVEL ===================================================== */
-                loadKotaList(provId) {
-                    const prov = this.provinsiList.find(p => p.id === provId);
-                    this.kotaList = prov ? prov.kota : [];
-                },
-
-                loadKecamatanList(kotaNama) {
-                    if (this.dataKecamatan[kotaNama]) {
-                        this.kecamatanList = this.dataKecamatan[kotaNama];
-                        this.showToastMessage(`📍 ${this.kecamatanList.length} kecamatan dimuat`);
-                    } else {
-                        this.kecamatanList = [];
-                        this.showToastMessage(`⚠️ Data kecamatan untuk ${kotaNama} belum tersedia. Menggunakan nama Kota.`);
-                    }
-                },
-
-                onProvinsiChange() {
-                    this.selectedKota = '';
-                    this.selectedKecamatan = '';
-                    this.kota = 'Belum dipilih';
-                    this.kecamatanList = [];
-
-                    if (this.selectedProvinsi) {
-                        localStorage.setItem('sholat_provinsi', this.selectedProvinsi);
-                        this.loadKotaList(this.selectedProvinsi);
-                        this.showToastMessage(`📍 ${this.kotaList.length} kota/kabupaten dimuat`);
-                    } else {
-                        this.kotaList = [];
-                        localStorage.removeItem('sholat_provinsi');
-                    }
-                },
-
-                onKotaChange() {
-                    this.selectedKecamatan = '';
-                    this.kecamatanList = [];
-
-                    if (this.selectedKota) {
-                        localStorage.setItem('sholat_kota_dropdown', this.selectedKota);
-                        this.loadKecamatanList(this.selectedKota);
-
-                        // Fallback otomatis: Jika tidak ada kecamatan, langsung pakai nama kota
-                        if (this.kecamatanList.length === 0) {
-                            this.kota = this.selectedKota;
-                            localStorage.setItem('sholat_kota', this.kota);
-                            this.gantiKota();
-                        }
-                    } else {
-                        this.kota = 'Belum dipilih';
-                        localStorage.removeItem('sholat_kota_dropdown');
-                    }
-                },
-
-                onKecamatanChange() {
-                    if (this.selectedKecamatan) {
-                        this.kota = `${this.selectedKecamatan} ${this.selectedKota}`;
-                        localStorage.setItem('sholat_kecamatan_dropdown', this.selectedKecamatan);
-                        localStorage.setItem('sholat_kota', this.kota);
-                        this.gantiKota();
-                    } else {
-                        this.kota = this.selectedKota;
-                        localStorage.setItem('sholat_kota', this.kota);
-                        localStorage.removeItem('sholat_kecamatan_dropdown');
-                    }
-                },
-
-                // FUNGSI pakaiManualKota() DIHAPUS TOTAL agar tidak ada konflik
-
-                /* ===================================================== GANTI KOTA ===================================================== */
-                async gantiKota() {
-                    this.showToastMessage(`📍 Memuat jadwal ${this.kota}...`);
-                    this.loading = true;
-                    this.adzanPlayed = false;
-                    await this.ambilJadwal();
-                },
-
-                /* ===================================================== AMBIL JADWAL ===================================================== */
-                async ambilJadwal() {
-                    this.loading = true;
-                    try {
-                        const tanggal = new Date();
-                        const year = tanggal.getFullYear();
-                        const month = String(tanggal.getMonth() + 1).padStart(2, '0');
-                        const day = String(tanggal.getDate()).padStart(2, '0');
-
-                        const url =
-                            `/api/jadwal-sholat?city=${encodeURIComponent(this.kota)}&date=${year}-${month}-${day}&_=${Date.now()}`;
-
-                        const response = await fetch(url, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Cache-Control': 'no-cache'
-                            }
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) throw new Error(data.detail || data.error || 'Gagal');
-
-                        if (data.code === 200 && data.data && data.data.timings) {
-                            this.jadwalSholat = data.data.timings;
-                            if (data.data.date?.hijri) {
-                                this.tanggalHijriah =
-                                    `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year} H`;
-                            }
-                            if (data.data.date?.readable) {
-                                this.tanggalMasehi = data.data.date.readable;
-                            }
-                            this.updateCountdown();
-                            this.showToastMessage(`✅ Jadwal ${this.kota} dimuat`);
-                        } else if (data.timings) {
-                            this.jadwalSholat = data.timings;
-                            this.updateCountdown();
-                        } else {
-                            throw new Error('Format tidak dikenali');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.showToastMessage(`❌ Gagal: ${error.message}. Jadwal default ditampilkan.`);
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-
-                /* ===================================================== FUNGSI BANTUAN ===================================================== */
                 formatWaktu(waktu24) {
                     if (!waktu24) return '--:--';
                     return waktu24.toString().split(' ')[0].substring(0, 5);
@@ -795,11 +552,11 @@
                             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-                            this.countdown =
-                                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                            this.countdown = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' +
+                                String(seconds).padStart(2, '0');
 
                             if (diff <= 1000 && diff >= 0 && !this.adzanPlayed) {
-                                this.putarAdzan();
+                                this.aktifkanAlarmSholat();
                                 this.adzanPlayed = true;
                                 setTimeout(() => {
                                     this.adzanPlayed = false;
@@ -816,21 +573,19 @@
                             return;
                         }
                         const waktu = this.formatWaktu(waktuStr);
-                        const [jam, menit] = waktu.split(':').map(Number);
-
+                        const jamMenit = waktu.split(':');
+                        const jam = parseInt(jamMenit[0], 10);
+                        const menit = parseInt(jamMenit[1], 10);
                         const prayerTimeBesok = new Date();
                         prayerTimeBesok.setDate(prayerTimeBesok.getDate() + 1);
                         prayerTimeBesok.setHours(jam, menit, 0, 0);
-
                         const diff = prayerTimeBesok.getTime() - now.getTime();
                         this.sholatBerikutnyaNama = 'Fajr';
-
                         const hours = Math.floor(diff / (1000 * 60 * 60));
                         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                        this.countdown =
-                            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        this.countdown = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' +
+                            String(seconds).padStart(2, '0');
                     }
                 },
 
@@ -843,35 +598,58 @@
                     audio.load();
                 },
 
-                putarAdzan() {
+                async aktifkanAlarmSholat() {
+                    const namaSholat = this.translateNama(this.sholatBerikutnyaNama);
+
                     const audio = this.$refs.audioAdzan;
-                    if (!audio) return;
-                    audio.currentTime = 0;
-                    audio.loop = false;
-                    audio.play().then(() => {
-                        this.isPlaying = true;
-                        this.showToastMessage(`🕌 Waktunya ${this.translateNama(this.sholatBerikutnyaNama)}`);
-                    }).catch(error => {
-                        this.showToastMessage('⏰ Waktunya sholat! Klik Tes Adzan.');
-                    });
+                    if (audio) {
+                        audio.currentTime = 0;
+                        audio.play().catch(() => {});
+                    }
+
+                    if (LocalNotif) {
+                        try {
+                            await LocalNotif.schedule({
+                                notifications: [{
+                                    title: 'Waktunya Sholat ' + namaSholat,
+                                    body: 'Segera laksanakan sholat ' + namaSholat + ' di ' + this
+                                        .displayLocation,
+                                    id: Date.now(),
+                                    channelId: 'alarm_channel',
+                                    schedule: {
+                                        at: new Date(Date.now() + 1000)
+                                    },
+                                    sound: 'default',
+                                    extra: {
+                                        prayer: namaSholat
+                                    }
+                                }]
+                            });
+                            this.showToastMessage('Waktunya ' + namaSholat + '!');
+                        } catch (error) {
+                            console.error("Gagal mengirim notifikasi:", error);
+                            this.showToastMessage('Waktunya ' + namaSholat + '!');
+                        }
+                    } else {
+                        this.showToastMessage('Waktunya ' + namaSholat + '!');
+                    }
                 },
 
                 toggleAdzan() {
                     const audio = this.$refs.audioAdzan;
                     if (!audio) return;
-
                     if (this.isPlaying) {
                         audio.pause();
                         audio.currentTime = 0;
                         this.isPlaying = false;
-                        this.showToastMessage('⏹️ Adzan dihentikan');
+                        this.showToastMessage('Adzan dihentikan');
                     } else {
                         audio.loop = true;
                         audio.play().then(() => {
                             this.isPlaying = true;
-                            this.showToastMessage('▶️ Adzan diputar...');
-                        }).catch(error => {
-                            this.showToastMessage('❌ Gagal memutar adzan');
+                            this.showToastMessage('Adzan diputar...');
+                        }).catch(() => {
+                            this.showToastMessage('Gagal memutar adzan');
                         });
                     }
                 },
@@ -881,7 +659,7 @@
                     if (!audio) return;
                     this.isMuted = !this.isMuted;
                     audio.muted = this.isMuted;
-                    this.showToastMessage(this.isMuted ? '🔇 Muted' : '🔊 Unmuted');
+                    this.showToastMessage(this.isMuted ? 'Muted' : 'Unmuted');
                 },
 
                 gantiAdzan() {
@@ -894,15 +672,10 @@
                         }
                         this.isPlaying = false;
                     }
-
                     localStorage.setItem('selected_adzan', this.selectedAdzan);
                     this.updateAudioSource();
-
-                    if (wasPlaying) {
-                        setTimeout(() => this.toggleAdzan(), 300);
-                    }
-
-                    this.showToastMessage(`✅ Suara adzan disimpan: ${this.selectedAdzan}`);
+                    if (wasPlaying) setTimeout(() => this.toggleAdzan(), 300);
+                    this.showToastMessage('Suara adzan disimpan: ' + this.selectedAdzan);
                 },
 
                 translateNama(nama) {
