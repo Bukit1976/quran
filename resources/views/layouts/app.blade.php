@@ -150,7 +150,7 @@
                                     ['route' => 'doa.index', 'label' => 'Doa'],
                                     ['route' => 'tes.index', 'label' => 'Tes'],
                                     ['route' => 'statistik.index', 'label' => 'Statistik'],
-                                    ['route' => 'translate.index', 'label' => 'Translate AI'],
+                                    ['route' => 'translate.index', 'label' => 'Translate'],
                                     ['route' => 'ai.index', 'label' => 'AI'],
                                 ];
                             @endphp
