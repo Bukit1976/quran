@@ -37,7 +37,7 @@
 
                 {{-- Tombol Refresh GPS --}}
                 <button @click="detectLocationGPS()" :disabled="detectingGPS"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-cyan-600">
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
                     <svg x-show="!detectingGPS" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -93,7 +93,7 @@
 
                 <div class="flex flex-col gap-3 sm:flex-row">
                     <select x-model="selectedAdzan" @change="gantiAdzan()"
-                        class="w-full sm:min-w-[250px] rounded-xl border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        class="w-full rounded-xl border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 sm:min-w-[250px]">
                         <optgroup label="Timur Tengah">
                             <option value="masjidil_haram">Masjidil Haram (Mekkah)</option>
                             <option value="mishary_alafasy">Mishary Rashid Alafasy</option>
@@ -110,13 +110,13 @@
 
                     <div class="flex gap-2">
                         <button @click="toggleAdzan()"
-                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95 sm:flex-none"
                             :class="isPlaying ? 'bg-gradient-to-r from-red-500 to-pink-500' :
                                 'bg-gradient-to-r from-amber-500 to-orange-500'">
                             <span x-text="isPlaying ? 'Stop' : 'Tes Adzan'"></span>
                         </button>
                         <button @click="toggleMute()"
-                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95 sm:flex-none"
                             :class="isMuted ? 'bg-red-500' : 'bg-gray-500'">
                             <span x-text="isMuted ? 'Unmute' : 'Mute'"></span>
                         </button>
@@ -127,7 +127,7 @@
 
         {{-- COUNTDOWN --}}
         <div
-            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-6 md:p-8 text-white shadow-2xl">
+            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-6 text-white shadow-2xl md:p-8">
             <div class="relative z-10">
                 <div class="mb-4 flex items-center gap-2 text-emerald-100">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,10 +136,10 @@
                     </svg>
                     <span class="text-sm font-medium">Menuju Sholat Berikutnya:</span>
                 </div>
-                <h3 class="mb-2 text-3xl md:text-4xl font-bold"
+                <h3 class="mb-2 text-3xl font-bold md:text-4xl"
                     x-text="translateNama(sholatBerikutnyaNama) || 'Memuat...'"></h3>
                 <div class="flex items-baseline gap-2">
-                    <span class="font-mono text-4xl md:text-5xl font-bold" x-text="countdown"></span>
+                    <span class="font-mono text-4xl font-bold md:text-5xl" x-text="countdown"></span>
                     <span class="text-emerald-200">lagi</span>
                 </div>
                 <div class="mt-4 flex flex-wrap items-center gap-2 text-sm text-emerald-100">
@@ -165,74 +165,74 @@
         </div>
 
         {{-- JADWAL SHOLAT --}}
-        <div x-show="!loading" x-cloak class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+        <div x-show="!loading" x-cloak class="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8">
             {{-- SUBUH --}}
-            <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer"
+            <div class="group relative cursor-pointer p-4 text-center transition-all duration-300 hover:scale-110 md:p-6"
                 :class="{ 'scale-110': isNextPrayer('Fajr') }">
                 <img src="{{ asset('Logo/Jadwal.png') }}" alt="Subuh"
-                    class="h-24 w-24 md:h-32 md:w-32 mx-auto mb-3 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(16,185,129,0.8)] transition-all duration-300">
-                <p class="mb-2 text-sm md:text-base font-bold tracking-wider text-gray-700 dark:text-gray-200">SUBUH</p>
-                <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    class="mx-auto mb-3 h-24 w-24 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(16,185,129,0.8)] md:h-32 md:w-32">
+                <p class="mb-2 text-sm font-bold tracking-wider text-gray-700 dark:text-gray-200 md:text-base">SUBUH</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
                     x-text="formatWaktu(jadwalSholat.Fajr)"></p>
                 <span x-show="isNextPrayer('Fajr')"
-                    class="mt-3 inline-block rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white animate-pulse shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
+                    class="mt-3 inline-block animate-pulse rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
             </div>
 
             {{-- TERBIT --}}
-            <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer">
+            <div class="group relative cursor-pointer p-4 text-center transition-all duration-300 hover:scale-110 md:p-6">
                 <img src="{{ asset('Logo/Jadwal.png') }}" alt="Terbit"
-                    class="h-24 w-24 md:h-32 md:w-32 mx-auto mb-3 object-contain drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(245,158,11,0.8)] transition-all duration-300">
-                <p class="mb-2 text-sm md:text-base font-bold tracking-wider text-gray-700 dark:text-gray-200">TERBIT</p>
-                <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    class="mx-auto mb-3 h-24 w-24 object-contain drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(245,158,11,0.8)] md:h-32 md:w-32">
+                <p class="mb-2 text-sm font-bold tracking-wider text-gray-700 dark:text-gray-200 md:text-base">TERBIT</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
                     x-text="formatWaktu(jadwalSholat.Sunrise)"></p>
             </div>
 
             {{-- DZUHUR --}}
-            <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer"
+            <div class="group relative cursor-pointer p-4 text-center transition-all duration-300 hover:scale-110 md:p-6"
                 :class="{ 'scale-110': isNextPrayer('Dhuhr') }">
                 <img src="{{ asset('Logo/Jadwal.png') }}" alt="Dzuhur"
-                    class="h-24 w-24 md:h-32 md:w-32 mx-auto mb-3 object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(234,179,8,0.8)] transition-all duration-300">
-                <p class="mb-2 text-sm md:text-base font-bold tracking-wider text-gray-700 dark:text-gray-200">DZUHUR</p>
-                <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    class="mx-auto mb-3 h-24 w-24 object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(234,179,8,0.8)] md:h-32 md:w-32">
+                <p class="mb-2 text-sm font-bold tracking-wider text-gray-700 dark:text-gray-200 md:text-base">DZUHUR</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
                     x-text="formatWaktu(jadwalSholat.Dhuhr)"></p>
                 <span x-show="isNextPrayer('Dhuhr')"
-                    class="mt-3 inline-block rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white animate-pulse shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
+                    class="mt-3 inline-block animate-pulse rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
             </div>
 
             {{-- ASHAR --}}
-            <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer"
+            <div class="group relative cursor-pointer p-4 text-center transition-all duration-300 hover:scale-110 md:p-6"
                 :class="{ 'scale-110': isNextPrayer('Asr') }">
                 <img src="{{ asset('Logo/Jadwal.png') }}" alt="Ashar"
-                    class="h-24 w-24 md:h-32 md:w-32 mx-auto mb-3 object-contain drop-shadow-[0_0_15px_rgba(249,115,22,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(249,115,22,0.8)] transition-all duration-300">
-                <p class="mb-2 text-sm md:text-base font-bold tracking-wider text-gray-700 dark:text-gray-200">ASHAR</p>
-                <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    class="mx-auto mb-3 h-24 w-24 object-contain drop-shadow-[0_0_15px_rgba(249,115,22,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(249,115,22,0.8)] md:h-32 md:w-32">
+                <p class="mb-2 text-sm font-bold tracking-wider text-gray-700 dark:text-gray-200 md:text-base">ASHAR</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
                     x-text="formatWaktu(jadwalSholat.Asr)"></p>
                 <span x-show="isNextPrayer('Asr')"
-                    class="mt-3 inline-block rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white animate-pulse shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
+                    class="mt-3 inline-block animate-pulse rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
             </div>
 
             {{-- MAGHRIB --}}
-            <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer"
+            <div class="group relative cursor-pointer p-4 text-center transition-all duration-300 hover:scale-110 md:p-6"
                 :class="{ 'scale-110': isNextPrayer('Maghrib') }">
                 <img src="{{ asset('Logo/Jadwal.png') }}" alt="Maghrib"
-                    class="h-24 w-24 md:h-32 md:w-32 mx-auto mb-3 object-contain drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(239,68,68,0.8)] transition-all duration-300">
-                <p class="mb-2 text-sm md:text-base font-bold tracking-wider text-gray-700 dark:text-gray-200">MAGHRIB</p>
-                <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    class="mx-auto mb-3 h-24 w-24 object-contain drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(239,68,68,0.8)] md:h-32 md:w-32">
+                <p class="mb-2 text-sm font-bold tracking-wider text-gray-700 dark:text-gray-200 md:text-base">MAGHRIB</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
                     x-text="formatWaktu(jadwalSholat.Maghrib)"></p>
                 <span x-show="isNextPrayer('Maghrib')"
-                    class="mt-3 inline-block rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white animate-pulse shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
+                    class="mt-3 inline-block animate-pulse rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
             </div>
 
             {{-- ISYA --}}
-            <div class="relative p-4 md:p-6 text-center transition-all duration-300 hover:scale-110 group cursor-pointer"
+            <div class="group relative cursor-pointer p-4 text-center transition-all duration-300 hover:scale-110 md:p-6"
                 :class="{ 'scale-110': isNextPrayer('Isha') }">
                 <img src="{{ asset('Logo/Jadwal.png') }}" alt="Isya"
-                    class="h-24 w-24 md:h-32 md:w-32 mx-auto mb-3 object-contain drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(99,102,241,0.8)] transition-all duration-300">
-                <p class="mb-2 text-sm md:text-base font-bold tracking-wider text-gray-700 dark:text-gray-200">ISYA</p>
-                <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    class="mx-auto mb-3 h-24 w-24 object-contain drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(99,102,241,0.8)] md:h-32 md:w-32">
+                <p class="mb-2 text-sm font-bold tracking-wider text-gray-700 dark:text-gray-200 md:text-base">ISYA</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
                     x-text="formatWaktu(jadwalSholat.Isha)"></p>
                 <span x-show="isNextPrayer('Isha')"
-                    class="mt-3 inline-block rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white animate-pulse shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
+                    class="mt-3 inline-block animate-pulse rounded-full bg-emerald-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">BERIKUTNYA</span>
             </div>
         </div>
 
@@ -260,13 +260,13 @@
 
         {{-- TOAST --}}
         <div x-show="showToast" x-transition x-cloak
-            class="fixed bottom-6 right-6 left-6 md:left-auto z-50 rounded-xl bg-emerald-600 px-6 py-4 text-white shadow-2xl">
+            class="fixed bottom-6 left-6 right-6 z-50 rounded-xl bg-emerald-600 px-6 py-4 text-white shadow-2xl md:left-auto">
             <div class="flex items-center gap-3">
                 <svg class="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="font-semibold text-sm md:text-base" x-text="toastMessage"></p>
+                <p class="text-sm font-semibold md:text-base" x-text="toastMessage"></p>
             </div>
         </div>
 
@@ -466,46 +466,95 @@
                         const month = String(tanggal.getMonth() + 1).padStart(2, '0');
                         const day = String(tanggal.getDate()).padStart(2, '0');
 
-                        const url = 'https://api.aladhan.com/v1/timings/' + year + '-' + month + '-' + day +
-                            '?latitude=' + lat + '&longitude=' + lng + '&method=11&timezone=Asia/Jakarta';
+                        // TENTUKAN TIMEZONE OTOMATIS BERDASARKAN LONGITUDE
+                        let timezone = 'Asia/Jakarta'; // Default WIB
+                        if (lng >= 117.5 && lng < 140) {
+                            timezone = 'Asia/Makassar'; // WITA
+                        } else if (lng >= 140) {
+                            timezone = 'Asia/Jayapura'; // WIT
+                        }
+
+                        // GUNAKAN METHOD 20 (KEMENAG RI) + school=0 (Syafi'i)
+                        const url =
+                            `https://api.aladhan.com/v1/timings/${year}-${month}-${day}?latitude=${lat}&longitude=${lng}&method=20&school=0&adjustment=0&timezone=${timezone}`;
 
                         const response = await fetch(url);
                         const data = await response.json();
 
                         if (data.code === 200 && data.data && data.data.timings) {
                             this.jadwalSholat = data.data.timings;
+
+                            // ✅ PENTING: Ambil tanggal HARI INI dari sistem, bukan dari browser calendar
+                            const hariIni = new Date();
+                            const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                            const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                            ];
+
+                            // Format tanggal Masehi yang BENAR (dari sistem, bukan browser buggy)
+                            this.tanggalMasehi =
+                                `${namaHari[hariIni.getDay()]}, ${hariIni.getDate()} ${namaBulan[hariIni.getMonth()]} ${hariIni.getFullYear()}`;
+
+                            // Format tanggal Hijriah dari API Aladhan (yang akurat & sesuai Kemenag)
                             if (data.data.date && data.data.date.hijri) {
-                                this.tanggalHijriah = data.data.date.hijri.day + ' ' + data.data.date.hijri.month.en +
-                                    ' ' + data.data.date.hijri.year + ' H';
+                                const hijri = data.data.date.hijri;
+                                this.tanggalHijriah = `${hijri.day} ${hijri.month.en} ${hijri.year} H`;
+                            } else {
+                                this.tanggalHijriah = '';
                             }
-                            if (data.data.date && data.data.date.readable) {
-                                this.tanggalMasehi = data.data.date.readable;
-                            }
+
                             this.updateCountdown();
                         } else {
-                            throw new Error('Format tidak dikenali');
+                            throw new Error('Format data tidak dikenali dari API');
                         }
                     } catch (error) {
-                        console.error('Error:', error);
+                        console.error('Error Fetch Jadwal:', error);
                         this.showToastMessage('Gagal mengambil jadwal: ' + error.message);
                     } finally {
                         this.loading = false;
                     }
                 },
 
-                updateTanggal() {
-                    const now = new Date();
-                    const options = {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    };
-                    this.tanggalMasehi = now.toLocaleDateString('id-ID', options);
-                    this.tanggalHijriah = now.toLocaleDateString('ar-SA', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    }) + ' H';
+                async init() {
+                    this.updateAudioSource();
+
+                    if (LocalNotif) {
+                        try {
+                            await LocalNotif.createChannel({
+                                id: 'alarm_channel',
+                                name: 'Alarm Sholat',
+                                description: 'Notifikasi waktu sholat',
+                                importance: 4,
+                                visibility: 1,
+                                sound: 'default',
+                                vibration: true
+                            });
+                            await LocalNotif.requestPermissions();
+                        } catch (e) {
+                            console.log('Setup notifikasi:', e);
+                        }
+                    }
+
+                    // Coba load koordinat dari localStorage dulu
+                    const savedLat = localStorage.getItem('sholat_lat');
+                    const savedLng = localStorage.getItem('sholat_lng');
+                    const savedLocation = localStorage.getItem('sholat_location_name');
+
+                    if (savedLat && savedLng) {
+                        this.currentLat = parseFloat(savedLat);
+                        this.currentLng = parseFloat(savedLng);
+                        if (savedLocation) {
+                            this.displayLocation = savedLocation;
+                            this.gpsSuccess = true;
+                            this.locationStatus = 'Lokasi tersimpan: ' + savedLocation;
+                        }
+                        await this.fetchPrayerTimesByGPS(this.currentLat, this.currentLng);
+                    } else {
+                        // Belum ada data GPS, deteksi otomatis
+                        await this.detectLocationGPS();
+                    }
+
+                    this.startCountdown();
                 },
 
                 formatWaktu(waktu24) {

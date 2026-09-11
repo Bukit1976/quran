@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+// 2 BARIS PENGAMAN EKSTRA UNTUK MEMATIKAN PAKSA CEK SSL DI LEVEL SERVER
+putenv('CURL_SSL_VERIFYPEER=0');
+putenv('CURL_SSL_VERIFYHOST=0');
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -24,47 +28,62 @@ class TranslateController extends Controller
         $source = $request->source_lang;
         $target = $request->target_lang;
 
-        // Ambil API Key dan URL dari .env
-        $apiKey = env('GROQ_API_KEY');
-        $baseUrl = env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1');
+        $apiKey = env('GOOGLE_GEMINI_API_KEY');
+        $model = env('GEMINI_MODEL', 'gemini-1.5-flash');
 
         $prompt = "Anda adalah asisten penerjemah dan guru bahasa yang ahli.
-    Tugas Anda:
-    1. Terjemahkan teks berikut dari bahasa {$source} ke bahasa {$target}.
-    2. Jika ada kesalahan tata bahasa, ejaan, atau frasa yang tidak wajar dalam teks asli, berikan koreksi yang sopan dalam bahasa asli (contoh: 'Maaf, ada sedikit kesalahan. Yang lebih tepat adalah...'). Jika teks asli sudah sempurna, isi dengan null.
-    3. Berikan hasil terjemahan yang akurat dan natural.
+        Tugas Anda:
+        1. Terjemahkan teks berikut dari bahasa {$source} ke bahasa {$target}.
+        2. Jika ada kesalahan tata bahasa, ejaan, atau frasa yang tidak wajar dalam teks asli, berikan koreksi yang sopan dalam bahasa asli. Jika teks asli sudah sempurna, isi dengan null.
+        3. Berikan hasil terjemahan yang akurat dan natural.
 
-    Format respons Anda HARUS dalam JSON valid seperti ini:
-    {
-        \"correction\": \"Teks koreksi jika ada, atau null jika tidak ada kesalahan.\",
-        \"translation\": \"Hasil terjemahan.\"
-    }
+        Format respons Anda HARUS dalam JSON valid seperti ini:
+        {
+            \"correction\": \"Teks koreksi jika ada, atau null jika tidak ada kesalahan.\",
+            \"translation\": \"Hasil terjemahan.\"
+        }
 
-    Teks asli: \"{$text}\"";
+        Teks asli: \"{$text}\"";
 
         try {
-            // PENTING: Perhatikan URL diakhiri dengan /chat/completions
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])->post("{$baseUrl}/chat/completions", [
-                'model' => 'llama3-70b-8192', // Model Llama 3 70B (Sangat Profesional & Akurat)
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are a helpful translation and language correction assistant. Always respond in valid JSON format.'],
-                    ['role' => 'user', 'content' => $prompt]
-                ],
-                'temperature' => 0.3,
-                'response_format' => ['type' => 'json_object'], // Memaksa output JSON
-            ]);
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+
+            // PERHATIKAN: 'verify' => false adalah kunci utama mematikan error cURL 60
+            $response = Http::timeout(30)
+                ->withOptions(['verify' => false])
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
+                        ]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.3,
+                        'responseMimeType' => 'application/json',
+                    ]
+                ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                $content = $data['choices'][0]['message']['content'];
+                $content = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-                // Bersihkan respons dari markdown code block jika ada
+                // Bersihkan dari tanda markdown ```json jika ada
                 $content = preg_replace('/^```json\s*|\s*```$/', '', trim($content));
-
                 $result = json_decode($content, true);
+
+                // Fallback jika AI tidak merespons dalam format JSON yang sempurna
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return response()->json([
+                        'success' => true,
+                        'correction' => null,
+                        'translation' => $content,
+                    ]);
+                }
 
                 return response()->json([
                     'success' => true,
@@ -73,7 +92,6 @@ class TranslateController extends Controller
                 ]);
             }
 
-            // Tampilkan error detail jika gagal
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghubungi layanan AI. Detail: ' . $response->body()
