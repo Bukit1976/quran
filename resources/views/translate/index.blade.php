@@ -136,7 +136,7 @@
                 recognition: null,
 
                 init() {
-                    // Inisialisasi Web Speech API (Bawaan Browser, Gratis)
+                    // Inisialisasi Web Speech API
                     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                         this.recognition = new SpeechRecognition();
@@ -151,9 +151,22 @@
                         };
 
                         this.recognition.onerror = (event) => {
-                            console.error('Speech recognition error', event.error);
+                            console.error('Speech recognition error:', event.error);
                             this.isListening = false;
-                            alert('Gagal mengenali suara. Pastikan izin mikrofon sudah diberikan.');
+
+                            // Pesan error spesifik untuk Android/Capacitor
+                            let errorMsg = 'Gagal mengenali suara.';
+                            if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+                                errorMsg =
+                                    'IZIN MIKROFON DITOLAK.\n\nSilakan buka: Pengaturan HP > Aplikasi > [Nama Aplikasi Anda] > Izinkan > Mikrofon.';
+                            } else if (event.error === 'no-speech') {
+                                errorMsg = 'Tidak ada suara yang terdeteksi. Coba bicara lebih jelas/dekat ke mic.';
+                            } else if (event.error === 'network') {
+                                errorMsg = 'Gagal terhubung ke layanan suara. Pastikan koneksi internet stabil.';
+                            } else {
+                                errorMsg = 'Error: ' + event.error;
+                            }
+                            alert(errorMsg);
                         };
 
                         this.recognition.onend = () => {
@@ -184,9 +197,17 @@
                         this.recognition.stop();
                         this.isListening = false;
                     } else {
+                        // Pastikan bahasa di-set sebelum start
                         this.recognition.lang = this.getSpeechLang(this.sourceLang);
-                        this.recognition.start();
-                        this.isListening = true;
+
+                        try {
+                            this.recognition.start(); // <-- Ini yang akan memicu pop-up izin di Android
+                            this.isListening = true;
+                        } catch (e) {
+                            console.error("Gagal memulai recognition:", e);
+                            alert("Gagal mengakses mikrofon. Periksa izin di pengaturan HP.");
+                            this.isListening = false;
+                        }
                     }
                 },
 
@@ -222,9 +243,6 @@
                         if (data.success) {
                             this.correction = data.correction;
                             this.translation = data.translation;
-
-                            // Opsional: Langsung putar audio setelah berhasil
-                            // setTimeout(() => this.speakText(this.translation), 500);
                         } else {
                             alert('Gagal: ' + data.message);
                         }
@@ -238,15 +256,13 @@
 
                 speakText(text) {
                     if (!text) return;
-
-                    window.speechSynthesis.cancel(); // Hentikan audio sebelumnya jika ada
+                    window.speechSynthesis.cancel();
 
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = this.getSpeechLang(this.targetLang);
-                    utterance.rate = 0.9; // Sedikit lebih lambat agar jelas
+                    utterance.rate = 0.9;
                     utterance.pitch = 1;
 
-                    // Coba cari voice native yang sesuai
                     const voices = window.speechSynthesis.getVoices();
                     const targetVoice = voices.find(v => v.lang.startsWith(this.targetLang));
                     if (targetVoice) {
